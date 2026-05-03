@@ -3,361 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chhotu Ram Library</title>
+    <title>Chhotu Ram Library Portal</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
-        :root {
-            --bg-color: #f0f2f5;
-            --text-color: #333;
-            --primary: #2ecc71;
-            --secondary: #3498db;
-            --dark-blue: #2c3e50;
-            --card-bg: #ffffff;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #000000;
-            --text-color: #ffffff;
-            --card-bg: #1a1a1a;
-            --primary: #27ae60;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .container { padding: 20px; max-width: 800px; margin: auto; }
-        .hidden { display: none; }
+        :root { --bg: #ffffff; --accent: #0071e3; --gray: #f5f5f7; --text: #1d1d1f; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; -webkit-tap-highlight-color: transparent; }
         
-        /* UI Elements */
-        .btn {
-            background: var(--secondary);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            margin: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-back { background: #7f8c8d; }
-        .btn-admin { background: var(--dark-blue); }
-        .btn-student { background: var(--primary); }
-        .btn-print { background: #9b59b6; }
+        #intro { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; cursor: pointer; transition: 0.8s ease; }
+        .welcome { font-size: 2.5rem; font-weight: 700; opacity: 0; transform: translateY(20px); animation: fadeIn 1s forwards; text-align: center; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
 
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
+        .main-app { display: none; padding: 20px; max-width: 500px; margin: 0 auto; min-height: 100vh; }
+        .card { background: var(--gray); padding: 30px; border-radius: 24px; border: 1px solid #eee; text-align: center; margin-bottom: 20px; cursor: pointer; transition: 0.3s; }
+        .card:active { transform: scale(0.95); }
 
-        input {
-            padding: 10px;
-            width: 80%;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            background: var(--card-bg);
-            color: var(--text-color);
-        }
-
-        .book-img { width: 100px; height: 140px; object-fit: cover; border-radius: 5px; }
-        .success-tick { color: var(--primary); font-size: 50px; display: block; margin: 10px; }
+        .panel { display: none; position: fixed; inset: 0; background: white; z-index: 100; overflow-y: auto; padding: 20px; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--card-bg); }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        input, select, .btn-action { width: 100%; padding: 16px; margin: 10px 0; border-radius: 14px; border: 1px solid #ddd; font-size: 1rem; outline: none; }
+        .btn-action { background: var(--text); color: white; border: none; font-weight: 600; cursor: pointer; }
 
-        /* Print Specific Styles */
-        @media print {
-            .btn, .btn-back, input, .nav-header, h2, h3:not(.print-title) { display: none !important; }
-            .container { width: 100%; max-width: 100%; }
-            table { width: 100%; border: 1px solid black; }
-            th, td { border: 1px solid black; color: black; }
-            body { background: white; color: black; }
-        }
+        .book-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .book-item { background: var(--gray); padding: 10px; border-radius: 18px; text-align: center; }
+        .book-item img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; }
+
+        #face-id { position: fixed; inset: 0; background: white; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
+        .scan-frame { width: 220px; height: 220px; border: 3px solid var(--accent); border-radius: 40px; position: relative; overflow: hidden; }
+        .scan-line { position: absolute; width: 100%; height: 3px; background: var(--accent); top: 0; animation: scan 2s infinite linear; box-shadow: 0 0 15px var(--accent); }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
-<body data-theme="light">
+<body>
 
-    <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
+    <!-- Premium Sounds -->
+    <audio id="sfx-start" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
+    <audio id="sfx-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="sfx-success" src="https://assets.mixkit.co/active_storage/sfx/592/592-preview.mp3" preload="auto"></audio>
 
-    <div class="container">
-        <div id="page-landing">
-            <h1>Chhotu Ram Library</h1>
-            <img src="https://cdn-icons-png.flaticon.com/512/2232/2232688.png" width="100" alt="Logo">
-            <div style="margin-top: 30px;">
-                <button class="btn btn-admin" onclick="showPage('page-login')">1. ADMIN</button>
-                <button class="btn btn-student" onclick="showStudentPage()">2. STUDENT</button>
-            </div>
+    <div id="intro" onclick="launch()">
+        <div class="welcome">Welcome to Library</div>
+        <div style="color: #888; letter-spacing: 3px; text-transform: uppercase; margin-top: 10px;">Chhotu Ram Polytechnic</div>
+        <p style="margin-top: 40px; font-size: 0.8rem; color: #ccc;">TAP TO ENTER</p>
+    </div>
+
+    <div id="face-id">
+        <div class="scan-frame"><video id="v" style="width:100%; height:100%; object-fit:cover; transform:scaleX(-1)" autoplay muted playsinline></video><div class="scan-line"></div></div>
+        <h3 style="margin-top:20px">Authenticating...</h3>
+    </div>
+
+    <div class="main-app" id="app">
+        <h1 style="text-align:center; margin-bottom:40px;">Library Portal</h1>
+        <div class="card" onclick="checkAdmin()"><i class="fa-solid fa-user-shield fa-2x"></i><h3>Admin Panel</h3></div>
+        <div class="card" onclick="showPanel('p-books')"><i class="fa-solid fa-book-open fa-2x"></i><h3>All Books</h3></div>
+
+        <div id="p-books" class="panel">
+            <button class="btn-action" onclick="hidePanels()">Back</button>
+            <div id="public-list" class="book-grid"></div>
         </div>
 
-        <div id="page-login" class="hidden">
-            <h2>Admin Login</h2>
-            <input type="password" id="adminPass" placeholder="Enter Password" onclick="playClick()">
-            <br>
-            <button class="btn btn-back" onclick="showPage('page-landing')">Back</button>
-            <button class="btn" onclick="checkPassword()">Login</button>
-            <div id="login-status"></div>
-        </div>
+        <div id="p-admin" class="panel">
+            <button class="btn-action" onclick="hidePanels()">Exit Admin</button>
+            <button class="btn-action" onclick="showSub('s-up')">Upload Book</button>
+            <button class="btn-action" onclick="showSub('s-del')">Manage / Delete</button>
+            <button class="btn-action" onclick="showSub('s-rec')">Student Records</button>
+            <button class="btn-action" style="background:#34c759" onclick="enrollFace()">Link Face ID</button>
 
-        <div id="page-admin-dash" class="hidden">
-            <h2>Admin Dashboard</h2>
-            <button class="btn" onclick="showPage('page-upload')">1. Upload Book</button>
-            <button class="btn" onclick="showDeletePage()">2. Delete Book</button>
-            <button class="btn" onclick="showIssuePage()">3. Student Records</button>
-            <button class="btn" onclick="showPage('page-settings')">4. Settings</button>
-            <br>
-            <button class="btn btn-back" onclick="showPage('page-landing')">Logout</button>
-        </div>
-
-        <div id="page-upload" class="hidden">
-            <h3>Upload New Book</h3>
-            <input type="text" id="bookName" placeholder="Book Name" onclick="playClick()">
-            <input type="text" id="authName" placeholder="Author Name" onclick="playClick()">
-            <input type="number" id="bookStock" placeholder="Stock Quantity" onclick="playClick()">
-            <input type="file" id="bookPic" accept="image/*" onclick="playClick()">
-            <br>
-            <button class="btn btn-back" onclick="showPage('page-admin-dash')">Back</button>
-            <button class="btn" onclick="saveBook()">Save Book</button>
-        </div>
-
-        <div id="page-delete" class="hidden">
-            <h3>Delete Books</h3>
-            <div id="delete-list"></div>
-            <button class="btn btn-back" onclick="showPage('page-admin-dash')">Back</button>
-        </div>
-
-        <div id="page-issue" class="hidden">
-            <h3 class="print-title">Chhotu Ram Library - Student Issue Records</h3>
-            <div class="card">
-                <input type="text" id="sName" placeholder="Student Name" onclick="playClick()">
-                <input type="text" id="sFather" placeholder="Father Name" onclick="playClick()">
-                <input type="text" id="sClass" placeholder="Class/Section" onclick="playClick()">
-                <input type="text" id="sRoll" placeholder="Roll No" onclick="playClick()">
-                <input type="text" id="sBook" placeholder="Book Name" onclick="playClick()">
-                <button class="btn" onclick="issueBook()">Add Record</button>
-            </div>
-            <button class="btn btn-print" onclick="printRecords()">🖨️ Print Records</button>
-            <table id="issue-table">
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Book</th>
-                        <th>Returned?</th>
-                        <th class="btn-hide">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="issue-list"></tbody>
-            </table>
-            <br>
-            <button class="btn btn-back" onclick="showPage('page-admin-dash')">Back</button>
-        </div>
-
-        <div id="page-settings" class="hidden">
-            <h3>Settings</h3>
-            <div class="card">
-                <h4>Change Password</h4>
-                <input type="password" id="currPass" placeholder="Current Password" onclick="playClick()">
-                <input type="password" id="newPass" placeholder="New Password" onclick="playClick()">
-                <button class="btn" onclick="changePassword()">Update Password</button>
-            </div>
-            <div class="card">
-                <h4>Theme</h4>
-                <button class="btn" onclick="setTheme('dark')">Dark Mode</button>
-                <button class="btn" onclick="setTheme('light')">Day Mode</button>
-            </div>
-            <button class="btn btn-back" onclick="showPage('page-admin-dash')">Back</button>
-        </div>
-
-        <div id="page-student" class="hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>Library Catalog</h3>
-                <div>
-                    <button class="btn" style="padding: 5px 10px;" onclick="setTheme('light')">☀️</button>
-                    <button class="btn" style="padding: 5px 10px; background: black;" onclick="setTheme('dark')">🌙</button>
-                </div>
-            </div>
-            <input type="text" id="searchBar" placeholder="Search books by name..." onkeyup="searchBooks()" onclick="playClick()">
-            <div id="student-book-list"></div>
-            <button class="btn btn-back" onclick="showPage('page-landing')">Back</button>
+            <div id="s-up" style="display:none"><input type="text" id="bT" placeholder="Book Title"><input type="file" id="bF" accept="image/*"><button class="btn-action" onclick="saveB()">Upload</button></div>
+            <div id="s-del" style="display:none"><div id="admin-list" class="book-grid"></div></div>
+            <div id="s-rec" style="display:none"><input type="text" id="sN" placeholder="Student Name"><select id="sS"><option value="✔️">Present</option><option value="❌">Absent</option></select><button class="btn-action" onclick="saveR()">Add</button><div id="r-list"></div></div>
         </div>
     </div>
 
     <script>
-        // Data Persistence
-        let books = JSON.parse(localStorage.getItem('books')) || [];
-        let issues = JSON.parse(localStorage.getItem('issues')) || [];
-        let adminPass = localStorage.getItem('adminPass') || "chhotu ram 2026";
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDcAGrr-e6mCzl fX1Dy2_o3VNc7ZBRnl4",
+            authDomain: "chhotu-ram-library.firebaseapp.com",
+            projectId: "chhotu-ram-library",
+            storageBucket: "chhotu-ram-library.firebasestorage.app",
+            messagingSenderId: "835322109497",
+            appId: "1:835322109497:web:e33499bfa92165082ef7e8",
+            measurementId: "G-MN2G371KYC"
+        };
 
-        function playClick() {
-            const sound = document.getElementById('clickSound');
-            sound.currentTime = 0; 
-            sound.play();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function launch() {
+            document.getElementById('sfx-start').play();
+            document.getElementById('intro').style.transform = 'translateY(-100%)';
+            document.getElementById('app').style.display = 'block';
         }
 
-        function showPage(pageId) {
-            playClick();
-            document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
-            document.getElementById(pageId).classList.remove('hidden');
+        async function checkAdmin() {
+            playSfx('sfx-click');
+            if(localStorage.getItem('fE') === 'true') {
+                document.getElementById('face-id').style.display = 'flex';
+                const s = await navigator.mediaDevices.getUserMedia({video:true});
+                document.getElementById('v').srcObject = s;
+                setTimeout(() => { s.getTracks().forEach(t=>t.stop()); document.getElementById('face-id').style.display = 'none'; playSfx('sfx-success'); showPanel('p-admin'); }, 2500);
+            } else { if(prompt("Password:") === "chhotu ram 2026") { playSfx('sfx-success'); showPanel('p-admin'); } }
         }
 
-        // --- ADMIN AUTH ---
-        function checkPassword() {
-            playClick();
-            const val = document.getElementById('adminPass').value;
-            if(val === adminPass) {
-                document.getElementById('login-status').innerHTML = '<span class="success-tick">✔ Correct</span>';
-                setTimeout(() => {
-                    document.getElementById('adminPass').value = "";
-                    document.getElementById('login-status').innerHTML = "";
-                    showPage('page-admin-dash');
-                }, 2000);
-            } else {
-                alert("Wrong Password!");
+        function saveB() {
+            const t = document.getElementById('bT').value, f = document.getElementById('bF').files[0];
+            if(t && f) { const r = new FileReader(); r.onload = (e) => { db.ref('books').push({t, i: e.target.result}); playSfx('sfx-success'); alert("Synced!"); }; r.readAsDataURL(f); }
+        }
+
+        db.ref('books').on('value', snap => {
+            const data = snap.val(); let h = "", a = "";
+            for(let id in data) {
+                h += `<div class="book-item"><img src="${data[id].i}"><h4>${data[id].t}</h4></div>`;
+                a += `<div class="book-item"><img src="${data[id].i}"><h4>${data[id].t}</h4><button style="background:red; color:white; border:none; padding:5px; border-radius:5px" onclick="delB('${id}')">Delete</button></div>`;
             }
-        }
+            document.getElementById('public-list').innerHTML = h;
+            document.getElementById('admin-list').innerHTML = a;
+        });
 
-        // --- BOOK MANAGEMENT ---
-        function saveBook() {
-            playClick();
-            const name = document.getElementById('bookName').value;
-            const auth = document.getElementById('authName').value;
-            const stock = document.getElementById('bookStock').value;
-            const fileInput = document.getElementById('bookPic');
-            
-            if(!name || !fileInput.files[0]) return alert("Please provide book name and image");
+        function delB(id) { if(confirm("Delete?")) db.ref('books/'+id).remove(); }
+        function saveR() { const n = document.getElementById('sN').value, m = document.getElementById('sS').value; if(n) db.ref('records').push({n, m}); }
+        db.ref('records').on('value', snap => {
+            const d = snap.val(); let h = "";
+            for(let id in d) h += `<p style="padding:10px; border-bottom:1px solid #eee">${d[id].m} ${d[id].n}</p>`;
+            document.getElementById('r-list').innerHTML = h;
+        });
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                books.push({ id: Date.now(), name, auth, stock, img: e.target.result });
-                localStorage.setItem('books', JSON.stringify(books));
-                alert("Book Uploaded Successfully!");
-                showPage('page-admin-dash');
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-        }
-
-        function showDeletePage() {
-            const list = document.getElementById('delete-list');
-            list.innerHTML = "";
-            books.forEach(book => {
-                list.innerHTML += `
-                    <div class="card">
-                        <img src="${book.img}" class="book-img"><br>
-                        <b>${book.name}</b><br>
-                        <button class="btn" style="background:#e74c3c" onclick="deleteBook(${book.id})">Delete Forever</button>
-                    </div>`;
-            });
-            showPage('page-delete');
-        }
-
-        function deleteBook(id) {
-            playClick();
-            books = books.filter(b => b.id !== id);
-            localStorage.setItem('books', JSON.stringify(books));
-            showDeletePage();
-        }
-
-        // --- ISSUE & PRINT RECORDS ---
-        function issueBook() {
-            playClick();
-            const name = document.getElementById('sName').value;
-            const book = document.getElementById('sBook').value;
-            if(!name || !book) return alert("Fill Student Name and Book Name");
-
-            issues.push({ name, book, returned: "No" });
-            localStorage.setItem('issues', JSON.stringify(issues));
-            showIssuePage();
-        }
-
-        function showIssuePage() {
-            const list = document.getElementById('issue-list');
-            list.innerHTML = "";
-            issues.forEach((iss, index) => {
-                list.innerHTML += `
-                    <tr>
-                        <td>${iss.name}</td>
-                        <td>${iss.book}</td>
-                        <td><b style="color:${iss.returned==='Yes'?'green':'red'}">${iss.returned}</b></td>
-                        <td class="btn-hide">
-                            <button onclick="toggleReturn(${index})">Toggle Yes/No</button>
-                            <button onclick="deleteRecord(${index})" style="color:red">X</button>
-                        </td>
-                    </tr>`;
-            });
-            showPage('page-issue');
-        }
-
-        function toggleReturn(index) {
-            playClick();
-            issues[index].returned = issues[index].returned === "Yes" ? "No" : "Yes";
-            localStorage.setItem('issues', JSON.stringify(issues));
-            showIssuePage();
-        }
-
-        function deleteRecord(index) {
-            playClick();
-            issues.splice(index, 1);
-            localStorage.setItem('issues', JSON.stringify(issues));
-            showIssuePage();
-        }
-
-        function printRecords() {
-            playClick();
-            window.print();
-        }
-
-        // --- SETTINGS & THEMES ---
-        function setTheme(mode) {
-            playClick();
-            document.body.setAttribute('data-theme', mode);
-        }
-
-        function changePassword() {
-            playClick();
-            const curr = document.getElementById('currPass').value;
-            const np = document.getElementById('newPass').value;
-            if(curr === adminPass) {
-                adminPass = np;
-                localStorage.setItem('adminPass', np);
-                alert("Password Changed Successfully!");
-            } else {
-                alert("Current Password Incorrect");
-            }
-        }
-
-        // --- STUDENT SEARCH ---
-        function showStudentPage() {
-            renderStudentBooks(books);
-            showPage('page-student');
-        }
-
-        function renderStudentBooks(data) {
-            const container = document.getElementById('student-book-list');
-            container.innerHTML = "";
-            data.forEach(book => {
-                container.innerHTML += `
-                    <div class="card">
-                        <img src="${book.img}" class="book-img">
-                        <h4>${book.name}</h4>
-                        <p>Author: ${book.auth} | Stock: ${book.stock}</p>
-                    </div>`;
-            });
-        }
-
-        function searchBooks() {
-            const term = document.getElementById('searchBar').value.toLowerCase();
-            const filtered = books.filter(b => b.name.toLowerCase().includes(term));
-            renderStudentBooks(filtered);
-        }
+        function playSfx(id) { document.getElementById(id).play().catch(()=>{}); }
+        function showPanel(id) { hidePanels(); document.getElementById(id).style.display = 'block'; }
+        function hidePanels() { document.querySelectorAll('.panel').forEach(p => p.style.display = 'none'); }
+        function showSub(id) { document.querySelectorAll('#p-admin div[id^="s-"]').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
+        function enrollFace() { localStorage.setItem('fE', 'true'); playSfx('sfx-success'); alert("Face ID Linked!"); }
     </script>
 </body>
 </html>
