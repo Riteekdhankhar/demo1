@@ -574,12 +574,11 @@
       <!-- TAB: Manage Books -->
       <div id="tab-manage" class="tab-content">
         <div class="card-box">
-          <h3>Manage Books</h3>
-          <div id="manage-books-list" style="display:grid;gap:1rem;margin-bottom:1.5rem"></div>
-          <div style="padding-top:1rem;border-top:1px solid rgba(201,168,76,.1)">
-            <p style="color:var(--text-muted);font-size:.78rem;margin-bottom:1rem">⚠ Delete all uploaded books permanently</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(201,168,76,.15)">
+            <h3 style="margin:0;border:none;padding:0">All Books</h3>
             <button class="btn btn-danger" onclick="confirmDeleteAll()">🗑 Delete All Books</button>
           </div>
+          <div id="manage-books-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1.2rem"></div>
         </div>
       </div>
 
@@ -818,17 +817,23 @@ function renderBooks() {
 function renderManageBooks() {
   const el = document.getElementById('manage-books-list');
   if(!books.length) {
-    el.innerHTML = `<p style="color:var(--text-muted);font-size:.82rem">No books uploaded yet.</p>`;
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:3rem;font-size:.82rem">No books uploaded yet.</div>`;
     return;
   }
   el.innerHTML = books.map((b,i) => `
-    <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--surface2);border:1px solid rgba(201,168,76,.1);border-radius:3px">
-      ${b.img ? `<img src="${b.img}" style="width:50px;height:66px;object-fit:cover;border-radius:2px;flex-shrink:0" alt="">` : `<div style="width:50px;height:66px;background:var(--surface3);border-radius:2px;flex-shrink:0"></div>`}
-      <div style="flex:1;min-width:0">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--text)">${b.title}</div>
-        ${b.author ? `<div style="font-size:.72rem;color:var(--text-muted)">${b.author}</div>` : ''}
+    <div style="background:var(--surface2);border:1px solid rgba(201,168,76,.12);border-radius:4px;overflow:hidden;position:relative;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 8px 30px rgba(0,0,0,.5)'" onmouseout="this.style.boxShadow='none'">
+      ${b.img
+        ? `<img src="${b.img}" alt="${b.title}" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block">`
+        : `<div style="width:100%;aspect-ratio:3/4;background:var(--surface3);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.7rem;flex-direction:column;gap:.5rem">
+             <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:.3"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+             No Cover
+           </div>`
+      }
+      <div style="padding:.75rem .8rem .9rem">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text);line-height:1.3;margin-bottom:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.title}</div>
+        ${b.author ? `<div style="font-size:.68rem;color:var(--gold);letter-spacing:.06em;margin-bottom:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.author}</div>` : '<div style="margin-bottom:.6rem"></div>'}
+        <button class="btn btn-danger" style="width:100%;padding:.5rem;font-size:.68rem;letter-spacing:.12em" onclick="deleteBook(${i})">🗑 Delete</button>
       </div>
-      <button class="icon-btn" onclick="deleteBook(${i})" title="Delete">🗑</button>
     </div>
   `).join('');
 }
