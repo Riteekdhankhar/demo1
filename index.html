@@ -38,45 +38,24 @@
     background: var(--deep);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 0;
     transition: opacity 1.2s ease, transform 1.2s ease;
   }
   #splash.hide { opacity: 0; pointer-events: none; transform: scale(1.04); }
 
   .splash-bg {
     position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.08) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 40% at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.08) 0%, transparent 70%);
   }
-  .splash-lines {
-    position: absolute; inset: 0; overflow: hidden; opacity: 0.06;
-  }
-  .splash-lines::before, .splash-lines::after {
-    content:'';
-    position: absolute;
-    width: 1px; height: 100%;
-    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
-    animation: lineFloat 4s ease-in-out infinite;
-  }
-  .splash-lines::before { left: 30%; animation-delay: 0s; }
-  .splash-lines::after  { left: 70%; animation-delay: 2s; }
-  @keyframes lineFloat { 0%,100%{opacity:.3;transform:scaleY(.7)} 50%{opacity:1;transform:scaleY(1)} }
 
   .college-name {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(2.2rem, 7vw, 5.5rem);
     font-weight: 700;
-    letter-spacing: 0.06em;
     text-align: center;
-    line-height: 1.1;
-    padding: 0 1rem;
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
     opacity: 0; transform: translateY(30px);
     animation: fadeUp 1.2s cubic-bezier(.16,1,.3,1) 0.3s forwards;
-    text-shadow: none;
   }
 
   .divider-line {
@@ -90,36 +69,14 @@
   .library-word {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(1.2rem, 4vw, 2.4rem);
-    font-weight: 300;
     letter-spacing: 0.5em;
-    text-transform: uppercase;
     color: var(--gold);
     opacity: 0;
     animation: glowReveal 1.5s ease 2s forwards;
-    position: relative;
   }
-  .library-word::after {
-    content: attr(data-text);
-    position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 0%, var(--gold-light) 50%, transparent 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-    background-size: 200% 100%;
-    animation: shimmer 2.5s ease 2s infinite;
-    opacity: 0;
-    animation: glowReveal 1.5s ease 2s forwards, shimmer 2.5s ease 3.5s infinite;
-  }
-  @keyframes glowReveal {
-    0%{opacity:0;letter-spacing:.8em;filter:blur(8px)}
-    100%{opacity:1;letter-spacing:.5em;filter:blur(0)}
-  }
-  @keyframes shimmer {
-    0%{background-position:200% 0}
-    100%{background-position:-200% 0}
-  }
-  @keyframes fadeUp {
-    to { opacity:1; transform:translateY(0); }
-  }
+
+  @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+  @keyframes glowReveal { 0%{opacity:0;filter:blur(8px)} 100%{opacity:1;filter:blur(0)} }
 
   .enter-btn {
     margin-top: 3.5rem;
@@ -127,33 +84,18 @@
     background: transparent;
     border: 1px solid var(--gold);
     color: var(--gold);
-    font-family: 'Montserrat', sans-serif;
-    font-size: .75rem;
-    font-weight: 600;
-    letter-spacing: .35em;
     text-transform: uppercase;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
     opacity: 0;
     animation: fadeUp .8s ease 3.2s forwards;
-    transition: color .3s;
+    transition: 0.3s;
   }
-  .enter-btn::before {
-    content:''; position:absolute; inset:0;
-    background: var(--gold);
-    transform: translateX(-101%);
-    transition: transform .4s cubic-bezier(.16,1,.3,1);
-  }
-  .enter-btn:hover::before { transform:translateX(0); }
-  .enter-btn:hover { color: var(--deep); }
-  .enter-btn span { position:relative; z-index:1; }
+  .enter-btn:hover { background: var(--gold); color: var(--deep); }
 
   /* ─── MAIN APP ─── */
-  #app { display:none; min-height:100vh; }
+  #app { display:none; }
   #app.visible { display:block; }
 
-  /* NAV */
   nav {
     position: sticky; top:0; z-index: 100;
     padding: 1.2rem 2rem;
@@ -162,845 +104,367 @@
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(201,168,76,.15);
   }
-  .nav-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem; font-weight: 600;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    letter-spacing: .04em;
-  }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); font-weight: 700; }
   .nav-links { display:flex; gap:1.5rem; }
-  .nav-link {
-    background:none; border:none; cursor:pointer;
-    color: var(--text-muted);
-    font-family: 'Montserrat', sans-serif;
-    font-size: .72rem; font-weight: 600;
-    letter-spacing: .25em; text-transform: uppercase;
-    padding: .5rem .8rem;
-    transition: color .2s;
-    position: relative;
-  }
-  .nav-link::after {
-    content:''; position:absolute; bottom:0; left:.8rem; right:.8rem;
-    height:1px; background:var(--gold);
-    transform: scaleX(0); transition: transform .3s;
-  }
-  .nav-link:hover, .nav-link.active { color:var(--gold); }
-  .nav-link:hover::after, .nav-link.active::after { transform:scaleX(1); }
+  .nav-link { background:none; border:none; color: var(--text-muted); cursor:pointer; font-weight:600; font-family: 'Montserrat'; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+  .nav-link.active { color: var(--gold); border-bottom: 1px solid var(--gold); }
 
-  /* PANELS */
-  .panel { display:none; animation: panelIn .5s ease forwards; }
-  .panel.active { display:block; }
-  @keyframes panelIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .panel { display:none; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  .panel.active { display:block; animation: panelIn .5s ease; }
+  @keyframes panelIn { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
 
-  /* ─── BOOKS PANEL ─── */
-  #panel-books { padding: 2.5rem 2rem 4rem; max-width:1200px; margin:0 auto; }
-  .panel-header {
-    text-align:center; margin-bottom:3rem;
-  }
-  .panel-header h2 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2rem,5vw,3.2rem); font-weight: 600;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-    margin-bottom: .5rem;
-  }
-  .panel-header p { color: var(--text-muted); font-size:.82rem; letter-spacing:.1em; }
-
-  .books-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.8rem;
-  }
-  .book-card {
-    background: var(--surface);
-    border: 1px solid rgba(201,168,76,.12);
-    border-radius: 4px;
-    overflow: hidden;
-    transition: transform .3s, box-shadow .3s, border-color .3s;
-  }
-  .book-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(201,168,76,.25);
-    border-color: rgba(201,168,76,.3);
-  }
-  .book-img {
-    width:100%; aspect-ratio:3/4; object-fit:cover;
-    background: var(--surface3);
-    display:flex; align-items:center; justify-content:center;
-  }
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.8rem; margin-top: 2rem; }
+  .book-card { background: var(--surface); border: 1px solid rgba(201,168,76,0.1); border-radius: 8px; overflow: hidden; transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+  .book-card:hover { transform: translateY(-8px); border-color: var(--gold); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+  .book-img { width:100%; aspect-ratio: 3/4; background: var(--surface3); display: flex; align-items:center; justify-content:center; }
   .book-img img { width:100%; height:100%; object-fit:cover; }
-  .book-img-placeholder {
-    width:100%; aspect-ratio:3/4;
-    background: linear-gradient(135deg, var(--surface2), var(--surface3));
-    display:flex; align-items:center; justify-content:center;
-    flex-direction:column; gap:.8rem; color:var(--text-muted);
-  }
-  .book-img-placeholder svg { opacity:.3; }
-  .book-info { padding:1rem 1.1rem 1.3rem; }
-  .book-title {
-    font-family:'Cormorant Garamond',serif;
-    font-size:1.1rem; font-weight:600; color:var(--text);
-    margin-bottom:.3rem; line-height:1.3;
-  }
-  .book-author { font-size:.72rem; color:var(--gold); letter-spacing:.1em; margin-bottom:.6rem; }
-  .book-tag {
-    display:inline-block; padding:.25rem .7rem;
-    background:rgba(201,168,76,.1); border:1px solid rgba(201,168,76,.2);
-    color:var(--gold); font-size:.65rem; letter-spacing:.12em; text-transform:uppercase;
-  }
+  .book-info { padding: 1.2rem; }
+  .book-title { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text); }
+  .book-author { color: var(--gold); font-size: 0.85rem; letter-spacing: 0.5px; }
 
-  .empty-state {
-    grid-column:1/-1; text-align:center; padding:5rem 2rem; color:var(--text-muted);
-  }
-  .empty-state svg { margin-bottom:1.5rem; opacity:.2; }
-  .empty-state h3 { font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--text); margin-bottom:.5rem; }
+  .card-box { background: var(--surface); padding: 2rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(201,168,76,0.1); }
+  .form-field { margin-bottom: 1.2rem; }
+  .form-field label { display:block; font-size: 0.7rem; margin-bottom: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .form-field input { width:100%; padding: 0.9rem; background: var(--surface2); border: 1px solid rgba(201,168,76,0.2); color: white; border-radius: 4px; outline: none; transition: 0.3s; }
+  .form-field input:focus { border-color: var(--gold); background: var(--surface3); }
+  
+  .btn { padding: 0.9rem 2rem; border:none; border-radius: 4px; cursor:pointer; font-weight:700; text-transform: uppercase; transition: 0.3s; font-family: 'Montserrat'; font-size: 0.75rem; letter-spacing: 1px; }
+  .btn-gold { background: var(--gold); color: black; }
+  .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-danger { background: rgba(224, 85, 85, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: white; }
 
-  /* ─── ADMIN PANEL ─── */
-  #panel-admin { padding:2.5rem 2rem 4rem; max-width:900px; margin:0 auto; }
+  #toast { position: fixed; bottom: 30px; right: 30px; background: var(--surface2); color: var(--gold); padding: 1.2rem 2.5rem; border-left: 5px solid var(--gold); border-radius: 4px; display: none; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 600; }
 
-  /* Login card */
-  .login-card {
-    max-width:420px; margin:4rem auto;
-    background:var(--surface);
-    border:1px solid rgba(201,168,76,.2);
-    border-radius:4px; padding:2.5rem 2rem;
-    text-align:center;
-  }
-  .login-card .lock-icon { margin-bottom:1.5rem; opacity:.6; }
-  .login-card h2 {
-    font-family:'Cormorant Garamond',serif; font-size:2rem;
-    background:linear-gradient(135deg,var(--gold-light),var(--gold));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-    margin-bottom:.4rem;
-  }
-  .login-card p { color:var(--text-muted); font-size:.78rem; letter-spacing:.1em; margin-bottom:2rem; }
+  .tabs { display: flex; gap: 1rem; margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
+  .tab-btn { background: transparent; color: var(--text-muted); padding: 0.6rem 1.5rem; border: none; cursor:pointer; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; transition: 0.3s; }
+  .tab-btn.active { color: var(--gold); position: relative; }
+  .tab-btn.active::after { content: ''; position: absolute; bottom: -1rem; left: 0; width: 100%; height: 2px; background: var(--gold); }
 
-  /* FORM */
-  .form-field { margin-bottom:1.2rem; text-align:left; }
-  .form-field label { display:block; font-size:.7rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--text-muted); margin-bottom:.5rem; }
-  .form-field input, .form-field textarea, .form-field select {
-    width:100%; padding:.8rem 1rem;
-    background:var(--surface2);
-    border:1px solid rgba(201,168,76,.15);
-    border-radius:2px; color:var(--text);
-    font-family:'Montserrat',sans-serif; font-size:.85rem;
-    outline:none; transition:border-color .2s, box-shadow .2s;
-  }
-  .form-field input:focus, .form-field textarea:focus {
-    border-color:var(--gold);
-    box-shadow:0 0 0 3px rgba(201,168,76,.08);
-  }
-  .form-field textarea { resize:vertical; min-height:80px; }
+  table { width:100%; border-collapse: collapse; }
+  th { text-align: left; color: var(--text-muted); font-size: 0.75rem; padding: 1.2rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(201,168,76,0.15); }
+  td { padding: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.9rem; }
 
-  .btn {
-    padding:.75rem 2rem; border:none; cursor:pointer;
-    font-family:'Montserrat',sans-serif; font-size:.75rem;
-    font-weight:600; letter-spacing:.2em; text-transform:uppercase;
-    border-radius:2px; transition:all .25s; position:relative; overflow:hidden;
-  }
-  .btn-gold {
-    background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-    color:var(--deep);
-  }
-  .btn-gold:hover { background:linear-gradient(135deg,var(--gold-light),var(--gold)); box-shadow:0 8px 25px rgba(201,168,76,.3); transform:translateY(-1px); }
-  .btn-outline {
-    background:transparent; border:1px solid rgba(201,168,76,.4); color:var(--gold);
-  }
-  .btn-outline:hover { background:rgba(201,168,76,.1); }
-  .btn-danger { background:rgba(224,85,85,.15); border:1px solid rgba(224,85,85,.3); color:var(--danger); }
-  .btn-danger:hover { background:rgba(224,85,85,.25); }
-
-  /* ADMIN DASHBOARD */
-  .admin-header {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:2.5rem; flex-wrap:wrap; gap:1rem;
-  }
-  .admin-header h2 {
-    font-family:'Cormorant Garamond',serif; font-size:2rem;
-    background:linear-gradient(135deg,var(--gold-light),var(--gold));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  }
-
-  .tabs {
-    display:flex; gap:.5rem; flex-wrap:wrap;
-    background:var(--surface); padding:.4rem;
-    border:1px solid rgba(201,168,76,.12); border-radius:4px;
-    margin-bottom:2.5rem;
-  }
-  .tab-btn {
-    background:none; border:none; cursor:pointer;
-    padding:.6rem 1.2rem;
-    font-family:'Montserrat',sans-serif; font-size:.7rem;
-    font-weight:600; letter-spacing:.18em; text-transform:uppercase;
-    color:var(--text-muted); border-radius:3px;
-    transition:all .2s;
-  }
-  .tab-btn.active {
-    background:rgba(201,168,76,.15);
-    color:var(--gold);
-    border-bottom:1px solid var(--gold);
-  }
-  .tab-btn:hover { color:var(--gold); }
-
-  .tab-content { display:none; animation:panelIn .4s ease; }
-  .tab-content.active { display:block; }
-
-  /* Upload area */
-  .upload-area {
-    border:2px dashed rgba(201,168,76,.2);
-    border-radius:4px; padding:2.5rem;
-    text-align:center; cursor:pointer;
-    transition:border-color .2s, background .2s;
-    margin-bottom:1.2rem; position:relative;
-  }
-  .upload-area:hover, .upload-area.drag { border-color:var(--gold); background:rgba(201,168,76,.04); }
-  .upload-area input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer; }
-  .upload-area svg { margin-bottom:.8rem; opacity:.4; }
-  .upload-area p { color:var(--text-muted); font-size:.8rem; }
-  .upload-area strong { color:var(--gold); }
-  #img-preview {
-    width:120px; height:160px; object-fit:cover;
-    border:1px solid rgba(201,168,76,.2); border-radius:2px;
-    display:none; margin:1rem auto 0;
-  }
-
-  /* Card box */
-  .card-box {
-    background:var(--surface);
-    border:1px solid rgba(201,168,76,.12);
-    border-radius:4px; padding:1.8rem;
-    margin-bottom:1.5rem;
-  }
-  .card-box h3 {
-    font-family:'Cormorant Garamond',serif; font-size:1.4rem;
-    color:var(--gold); margin-bottom:1.2rem;
-    border-bottom:1px solid rgba(201,168,76,.15); padding-bottom:.7rem;
-  }
-
-  /* Students table */
-  .students-table { width:100%; border-collapse:collapse; }
-  .students-table th {
-    font-size:.65rem; font-weight:700; letter-spacing:.2em;
-    text-transform:uppercase; color:var(--text-muted);
-    padding:.7rem 1rem; text-align:left;
-    border-bottom:1px solid rgba(201,168,76,.15);
-  }
-  .students-table td {
-    padding:.8rem 1rem; font-size:.82rem;
-    border-bottom:1px solid rgba(255,255,255,.04);
-    vertical-align:middle;
-  }
-  .students-table tr:hover td { background:rgba(201,168,76,.03); }
-  .status-badge {
-    display:inline-flex; align-items:center; gap:.4rem;
-    padding:.25rem .8rem; border-radius:99px; font-size:.68rem; font-weight:600;
-  }
-  .status-badge.ok { background:rgba(76,175,122,.15); color:var(--success); }
-  .status-badge.warn { background:rgba(232,168,52,.15); color:var(--warn); }
-
-  .icon-btn {
-    background:none; border:none; cursor:pointer;
-    padding:.35rem .5rem; border-radius:3px;
-    transition:background .2s; font-size:1rem;
-  }
-  .icon-btn:hover { background:rgba(255,255,255,.07); }
-
-  /* Toast */
-  #toast {
-    position:fixed; bottom:2rem; right:2rem;
-    background:var(--surface2);
-    border:1px solid rgba(201,168,76,.25);
-    border-left:3px solid var(--gold);
-    padding:1rem 1.5rem; min-width:260px;
-    border-radius:3px; z-index:9000;
-    font-size:.82rem; color:var(--text);
-    opacity:0; transform:translateX(20px);
-    transition:all .3s; pointer-events:none;
-  }
-  #toast.show { opacity:1; transform:translateX(0); }
-
-  /* Modal */
-  .modal-overlay {
-    display:none; position:fixed; inset:0; z-index:5000;
-    background:rgba(0,0,0,.75); backdrop-filter:blur(6px);
-    align-items:center; justify-content:center;
-  }
-  .modal-overlay.open { display:flex; }
-  .modal {
-    background:var(--surface); border:1px solid rgba(201,168,76,.2);
-    border-radius:4px; padding:2rem; width:min(500px,90vw);
-    animation:panelIn .3s ease;
-  }
-  .modal h3 { font-family:'Cormorant Garamond',serif; font-size:1.6rem; color:var(--gold); margin-bottom:1.5rem; }
-  .modal-actions { display:flex; gap:.8rem; justify-content:flex-end; margin-top:1.5rem; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width:5px; }
-  ::-webkit-scrollbar-track { background:var(--deep); }
-  ::-webkit-scrollbar-thumb { background:rgba(201,168,76,.3); border-radius:99px; }
-
-  /* Responsive */
-  @media(max-width:600px) {
-    nav { padding:.9rem 1rem; }
-    .nav-links { gap:.5rem; }
-    .nav-link { font-size:.65rem; padding:.4rem .5rem; letter-spacing:.12em; }
-    #panel-books, #panel-admin { padding:1.5rem 1rem 3rem; }
-    .tabs { gap:.25rem; }
-    .tab-btn { padding:.5rem .7rem; font-size:.65rem; letter-spacing:.1em; }
-    .students-table th, .students-table td { padding:.6rem .6rem; font-size:.75rem; }
+  @media (max-width: 600px) {
+    .nav-links { gap: 0.8rem; }
+    .nav-link { font-size: 0.65rem; }
+    .panel { padding: 1.2rem; }
   }
 </style>
 </head>
 <body>
 
-<!-- ═══ SPLASH ═══ -->
 <div id="splash">
   <div class="splash-bg"></div>
-  <div class="splash-lines"></div>
   <div class="college-name">Chhotu Ram<br>Polytechnic</div>
   <div class="divider-line"></div>
-  <div class="library-word" data-text="LIBRARY">LIBRARY</div>
-  <button class="enter-btn" onclick="enterPortal()"><span>Enter Portal</span></button>
+  <div class="library-word">LIBRARY</div>
+  <button class="enter-btn" onclick="enterPortal()">Enter Portal</button>
 </div>
 
-<!-- ═══ TOAST ═══ -->
 <div id="toast"></div>
 
-<!-- ═══ MAIN APP ═══ -->
 <div id="app">
   <nav>
     <div class="nav-logo">CRP Library</div>
     <div class="nav-links">
-      <button class="nav-link active" onclick="showPanel('books',this)">📚 Books</button>
-      <button class="nav-link" onclick="showPanel('admin',this)">🔐 Admin</button>
+      <button class="nav-link active" onclick="showPanel('books', this)">📚 Books</button>
+      <button class="nav-link" onclick="showPanel('admin', this)">🔐 Admin</button>
     </div>
   </nav>
 
-  <!-- BOOKS PANEL -->
+  <!-- PUBLIC VIEW -->
   <div id="panel-books" class="panel active">
-    <div style="max-width:1200px;margin:0 auto;padding:2.5rem 2rem 4rem">
-      <div class="panel-header">
-        <h2>Library Collection</h2>
-        <p>Chhotu Ram Polytechnic · Browse All Books</p>
-      </div>
-      <div class="books-grid" id="books-grid">
-        <div class="empty-state">
-          <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <h3>No Books Yet</h3>
-          <p style="font-size:.8rem;margin-top:.4rem">Admin can upload books from the Admin Panel</p>
-        </div>
-      </div>
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="font-family: 'Cormorant Garamond'; font-size: 3rem; font-weight: 700;">Library Collection</h2>
+        <p style="color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; font-size: 0.7rem;">Real-time Cloud Database</p>
     </div>
+    <div class="books-grid" id="books-grid"></div>
   </div>
 
-  <!-- ADMIN PANEL -->
+  <!-- ADMIN VIEW -->
   <div id="panel-admin" class="panel">
-
-    <!-- Login Form -->
     <div id="admin-login">
-      <div class="login-card">
-        <div class="lock-icon">
-          <svg width="48" height="48" fill="none" stroke="#C9A84C" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="1.5"/><path d="M7 11V7a5 5 0 0110 0v4" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div class="card-box" style="max-width: 450px; margin: 5rem auto; text-align: center;">
+            <h3 style="font-family: 'Cormorant Garamond'; font-size: 2rem; margin-bottom: 1.5rem;">Administrator Access</h3>
+            <div class="form-field">
+                <input type="password" id="admin-pass" placeholder="Enter Security Password" onkeydown="if(event.key==='Enter')adminLogin()">
+            </div>
+            <button class="btn btn-gold" style="width: 100%;" onclick="adminLogin()">Authorize</button>
         </div>
-        <h2>Admin Portal</h2>
-        <p>Authorized Personnel Only</p>
-        <div class="form-field">
-          <label>Password</label>
-          <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')adminLogin()">
-        </div>
-        <button class="btn btn-gold" style="width:100%" onclick="adminLogin()">Unlock Dashboard</button>
-        <p id="login-err" style="color:var(--danger);font-size:.75rem;margin-top:.8rem;display:none">Incorrect password. Please try again.</p>
-      </div>
     </div>
 
-    <!-- Dashboard -->
-    <div id="admin-dashboard" style="display:none">
-      <div class="admin-header">
-        <h2>Admin Dashboard</h2>
-        <button class="btn btn-outline" onclick="adminLogout()">Sign Out</button>
-      </div>
-
-      <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('tab-upload',this)">📤 Upload Book</button>
-        <button class="tab-btn" onclick="showTab('tab-students',this)">👤 Students</button>
-        <button class="tab-btn" onclick="showTab('tab-manage',this)">🗑 Manage Books</button>
-        <button class="tab-btn" onclick="showTab('tab-settings',this)">⚙ Settings</button>
-      </div>
-
-      <!-- TAB: Upload Book -->
-      <div id="tab-upload" class="tab-content active">
-        <div class="card-box">
-          <h3>Upload New Book</h3>
-          <div class="upload-area" id="upload-area">
-            <input type="file" id="book-img-input" accept="image/*" onchange="previewImg(this)">
-            <svg width="40" height="40" fill="none" stroke="#C9A84C" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <p>Tap to upload book cover<br><strong>from your device</strong></p>
-            <img id="img-preview" alt="preview">
-          </div>
-          <div class="form-field"><label>Book Title</label><input type="text" id="book-title" placeholder="e.g. Engineering Mathematics"></div>
-          <div class="form-field"><label>Author</label><input type="text" id="book-author" placeholder="e.g. R.D. Sharma"></div>
-          <div class="form-field"><label>Subject / Category</label><input type="text" id="book-cat" placeholder="e.g. Mathematics, Physics…"></div>
-          <div class="form-field"><label>Description (optional)</label><textarea id="book-desc" placeholder="Brief description…"></textarea></div>
-          <button class="btn btn-gold" onclick="uploadBook()">Upload Book</button>
+    <div id="admin-dashboard" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+            <h2 style="font-family: 'Cormorant Garamond'; font-size: 2.2rem;">Control Center</h2>
+            <button class="btn btn-danger" onclick="adminLogout()">Sign Out</button>
         </div>
-      </div>
 
-      <!-- TAB: Students -->
-      <div id="tab-students" class="tab-content">
-        <div class="card-box">
-          <h3>Add Student</h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-            <div class="form-field"><label>Student Name</label><input type="text" id="stu-name" placeholder="Full Name"></div>
-            <div class="form-field"><label>Roll Number</label><input type="text" id="stu-roll" placeholder="e.g. 2024-CS-001"></div>
-          </div>
-          <button class="btn btn-gold" onclick="addStudent()">Add Student</button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('tab-upload', this)">Upload Book</button>
+            <button class="tab-btn" onclick="showTab('tab-manage', this)">Inventory</button>
+            <button class="tab-btn" onclick="showTab('tab-students', this)">Student Registry</button>
         </div>
-        <div class="card-box">
-          <h3>Student Records</h3>
-          <div style="overflow-x:auto">
-            <table class="students-table">
-              <thead>
-                <tr><th>#</th><th>Name</th><th>Roll No.</th><th>Status</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="students-tbody">
-                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.8rem">No students added yet</td></tr>
-              </tbody>
-            </table>
-          </div>
+
+        <div id="tab-upload" class="tab-content active">
+            <div class="card-box">
+                <h3 style="margin-bottom: 1.5rem; color: var(--gold);">New Entry</h3>
+                <div class="form-field">
+                    <label>Cover Image</label>
+                    <input type="file" id="book-img-input" accept="image/*" onchange="previewImg(this)">
+                    <img id="img-preview" style="width: 120px; border-radius: 4px; margin-top: 15px; display: none; border: 1px solid var(--gold);">
+                </div>
+                <div class="form-field"><label>Book Title</label><input type="text" id="book-title" placeholder="e.g. Engineering Physics"></div>
+                <div class="form-field"><label>Author Name</label><input type="text" id="book-author" placeholder="e.g. Dr. Satya Prakash"></div>
+                <div class="form-field"><label>Category</label><input type="text" id="book-cat" placeholder="e.g. Applied Science"></div>
+                <button class="btn btn-gold" onclick="uploadBook()">Deploy to Cloud</button>
+            </div>
         </div>
-      </div>
 
-      <!-- TAB: Manage Books -->
-      <div id="tab-manage" class="tab-content">
-        <div class="card-box">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(201,168,76,.15)">
-            <h3 style="margin:0;border:none;padding:0">All Books</h3>
-            <button class="btn btn-danger" onclick="confirmDeleteAll()">🗑 Delete All Books</button>
-          </div>
-          <div id="manage-books-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1.2rem"></div>
+        <div id="tab-manage" class="tab-content">
+            <div class="card-box" id="manage-books-list"></div>
         </div>
-      </div>
 
-      <!-- TAB: Settings -->
-      <div id="tab-settings" class="tab-content">
-        <div class="card-box">
-          <h3>Change Password</h3>
-          <div class="form-field"><label>Current Password</label><input type="password" id="cur-pass" placeholder="Enter current password"></div>
-          <div class="form-field"><label>New Password</label><input type="password" id="new-pass" placeholder="Enter new password"></div>
-          <div class="form-field"><label>Confirm New Password</label><input type="password" id="conf-pass" placeholder="Confirm new password"></div>
-          <button class="btn btn-gold" onclick="changePassword()">Update Password</button>
-          <p id="pass-msg" style="margin-top:.8rem;font-size:.78rem;display:none"></p>
+        <div id="tab-students" class="tab-content">
+            <div class="card-box">
+                <h3 style="margin-bottom: 1.5rem; color: var(--gold);">Register Student</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-field"><input type="text" id="stu-name" placeholder="Full Name"></div>
+                    <div class="form-field"><input type="text" id="stu-roll" placeholder="Roll Number"></div>
+                </div>
+                <button class="btn btn-gold" onclick="addStudent()">Add Record</button>
+            </div>
+            <div class="card-box" style="padding: 0; overflow: hidden;">
+                <table>
+                    <thead><tr><th>Student Name</th><th>Roll No.</th><th style="text-align: right;">Management</th></tr></thead>
+                    <tbody id="students-tbody"></tbody>
+                </table>
+            </div>
         </div>
-      </div>
-
-    </div><!-- /dashboard -->
-  </div><!-- /admin panel -->
-
-</div><!-- /app -->
-
-<!-- Delete Confirm Modal -->
-<div class="modal-overlay" id="delete-modal">
-  <div class="modal">
-    <h3>Delete All Books?</h3>
-    <p style="color:var(--text-muted);font-size:.85rem;line-height:1.6">This action will permanently remove all uploaded books from the library. This cannot be undone.</p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger" onclick="deleteAllBooks()">Yes, Delete All</button>
     </div>
   </div>
 </div>
 
-<!-- Edit Student Modal -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal">
-    <h3>Edit Student</h3>
-    <div class="form-field"><label>Student Name</label><input type="text" id="edit-name" placeholder="Full Name"></div>
-    <div class="form-field"><label>Roll Number</label><input type="text" id="edit-roll" placeholder="Roll Number"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-gold" onclick="saveEditStudent()">Save Changes</button>
-    </div>
-  </div>
-</div>
+<!-- FIREBASE SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
 <script>
-// ── STATE ──
-let adminPassword = 'chhoturam123'; // default
-let books = JSON.parse(localStorage.getItem('crp_books') || '[]');
-let students = JSON.parse(localStorage.getItem('crp_students') || '[]');
-let editingStudentIdx = null;
-let currentImgData = null;
+// 1. Firebase Config (image_fbd61e.png ke anusar)
+const firebaseConfig = {
+  apiKey: "AIzaSyBluPCrnJVZpOU9tXcirTQDIXL9Bosqk64",
+  authDomain: "crp-library.firebaseapp.com",
+  databaseURL: "https://crp-library-default-rtdb.firebaseio.com",
+  projectId: "crp-library",
+  storageBucket: "crp-library.firebasestorage.app",
+  messagingSenderId: "1072254185300",
+  appId: "1:1072254185300:web:d00add38ef883dd85ae2c1"
+};
 
-// ── WEB AUDIO (luxury sound effects) ──
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// 2. LUXURY SOUND EFFECTS ENGINE
 const AC = window.AudioContext || window.webkitAudioContext;
 let ac;
 function getAC() { if(!ac) ac = new AC(); return ac; }
-
-function playTone(freq=440, type='sine', dur=.18, vol=.18, delay=0) {
+function playTone(freq=440, type='sine', dur=0.2, vol=0.1) {
   try {
-    const a = getAC();
-    const osc = a.createOscillator();
-    const gain = a.createGain();
-    osc.connect(gain); gain.connect(a.destination);
+    const a = getAC(); const osc = a.createOscillator(); const g = a.createGain();
+    osc.connect(g); g.connect(a.destination);
     osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0, a.currentTime + delay);
-    gain.gain.linearRampToValueAtTime(vol, a.currentTime + delay + .01);
-    gain.gain.exponentialRampToValueAtTime(.001, a.currentTime + delay + dur);
-    osc.start(a.currentTime + delay);
-    osc.stop(a.currentTime + delay + dur + .05);
+    g.gain.setValueAtTime(vol, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + dur);
+    osc.start(); osc.stop(a.currentTime + dur);
   } catch(e){}
 }
+const chime = () => { [523, 659, 784, 1046].forEach((f,i) => setTimeout(() => playTone(f, 'sine', 0.5, 0.1), i*100)); };
+const clickSound = () => playTone(800, 'triangle', 0.1, 0.05);
+const errorSound = () => { playTone(200, 'sawtooth', 0.3, 0.1); playTone(150, 'sawtooth', 0.3, 0.12); };
 
-function playChime() {
-  // Luxury ascending chime
-  const notes = [523.25, 659.25, 783.99, 1046.5];
-  notes.forEach((f,i) => playTone(f,'sine',.45,.12,i*.12));
+// 3. APPLICATION STATE
+let books = [];
+let students = [];
+let adminPassword = 'chhoturam123';
+let currentImgData = null;
+
+// 4. REAL-TIME CLOUD SYNC
+db.ref('library_data').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        books = data.books || [];
+        students = data.students || [];
+        adminPassword = data.adminPassword || 'chhoturam123';
+        
+        renderBooks();
+        renderManageBooks();
+        renderStudents();
+    }
+});
+
+function saveToCloud() {
+    db.ref('library_data').set({ books, students, adminPassword })
+      .then(() => toast("Cloud Synchronized ✨"))
+      .catch(err => toast("Sync Failed ❌", "err"));
 }
 
-function playSuccess() {
-  [523,659,784].forEach((f,i) => playTone(f,'sine',.3,.13,i*.1));
-}
-
-function playClick() {
-  playTone(880,'triangle',.08,.12);
-}
-
-function playError() {
-  playTone(220,'sawtooth',.25,.12);
-  playTone(196,'sawtooth',.25,.08,.1);
-}
-
-function playDelete() {
-  playTone(440,'sawtooth',.15,.12);
-  playTone(330,'sawtooth',.25,.12,.1);
-  playTone(220,'sawtooth',.3,.1,.2);
-}
-
-function playWelcome() {
-  // Rich welcome fanfare
-  const melody = [523,659,784,1047,784,880,1047];
-  melody.forEach((f,i) => playTone(f,'sine',.5,.15,i*.15));
-}
-
-// ── SPLASH ──
+// 5. INTERFACE LOGIC
 function enterPortal() {
-  playWelcome();
-  const splash = document.getElementById('splash');
-  splash.classList.add('hide');
-  setTimeout(() => {
-    splash.style.display = 'none';
-    const app = document.getElementById('app');
-    app.classList.add('visible');
-    renderBooks();
-    renderManageBooks();
-    renderStudents();
-  }, 1200);
+    chime();
+    const splash = document.getElementById('splash');
+    splash.classList.add('hide');
+    setTimeout(() => {
+        splash.style.display = 'none';
+        document.getElementById('app').classList.add('visible');
+    }, 1200);
 }
 
-// Auto-enter after 5s if user doesn't click
-setTimeout(() => {
-  const splash = document.getElementById('splash');
-  if(splash && !splash.classList.contains('hide')) enterPortal();
-}, 6000);
-
-// ── PANELS ──
-function showPanel(name, btn) {
-  playClick();
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  btn.classList.add('active');
+function showPanel(id, btn) {
+    clickSound();
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    btn.classList.add('active');
 }
 
-// ── TABS ──
 function showTab(id, btn) {
-  playClick();
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-  if(id === 'tab-manage') renderManageBooks();
+    clickSound();
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
 }
 
-// ── ADMIN AUTH ──
-function adminLogin() {
-  const val = document.getElementById('admin-pass').value;
-  const err = document.getElementById('login-err');
-  if(val === adminPassword) {
-    playSuccess();
-    document.getElementById('admin-login').style.display = 'none';
-    document.getElementById('admin-dashboard').style.display = 'block';
-    err.style.display = 'none';
-    toast('Welcome, Administrator');
-  } else {
-    playError();
-    err.style.display = 'block';
-    document.getElementById('admin-pass').style.borderColor='var(--danger)';
-    setTimeout(() => { document.getElementById('admin-pass').style.borderColor=''; }, 1200);
-  }
-}
-
-function adminLogout() {
-  playClick();
-  document.getElementById('admin-login').style.display = 'block';
-  document.getElementById('admin-dashboard').style.display = 'none';
-  document.getElementById('admin-pass').value = '';
-  toast('Signed out successfully');
-}
-
-// ── IMAGE PREVIEW ──
 function previewImg(input) {
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    currentImgData = e.target.result;
-    const prev = document.getElementById('img-preview');
-    prev.src = currentImgData;
-    prev.style.display = 'block';
-    playClick();
-  };
-  reader.readAsDataURL(file);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            currentImgData = e.target.result;
+            const prev = document.getElementById('img-preview');
+            prev.src = currentImgData;
+            prev.style.display = 'block';
+            clickSound();
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
 }
 
-// ── UPLOAD BOOK ──
 function uploadBook() {
-  const title = document.getElementById('book-title').value.trim();
-  const author = document.getElementById('book-author').value.trim();
-  const cat = document.getElementById('book-cat').value.trim();
-  const desc = document.getElementById('book-desc').value.trim();
-  if(!title){ playError(); toast('Please enter a book title','warn'); return; }
-  const book = { id: Date.now(), title, author, cat, desc, img: currentImgData };
-  books.push(book);
-  saveBooks();
-  renderBooks();
-  renderManageBooks();
-  playSuccess();
-  toast('Book uploaded successfully!');
-  // Reset
-  document.getElementById('book-title').value = '';
-  document.getElementById('book-author').value = '';
-  document.getElementById('book-cat').value = '';
-  document.getElementById('book-desc').value = '';
-  document.getElementById('img-preview').style.display = 'none';
-  document.getElementById('book-img-input').value = '';
-  currentImgData = null;
+    const title = document.getElementById('book-title').value.trim();
+    const author = document.getElementById('book-author').value.trim();
+    const cat = document.getElementById('book-cat').value.trim();
+    
+    if(!title) { errorSound(); return toast("Title is required", "err"); }
+
+    books.push({ title, author, cat, img: currentImgData, id: Date.now() });
+    saveToCloud();
+    chime();
+    
+    // Reset Inputs
+    document.getElementById('book-title').value = '';
+    document.getElementById('book-author').value = '';
+    document.getElementById('book-cat').value = '';
+    document.getElementById('img-preview').style.display = 'none';
+    document.getElementById('book-img-input').value = '';
+    currentImgData = null;
 }
 
-// ── RENDER BOOKS (public) ──
 function renderBooks() {
-  const grid = document.getElementById('books-grid');
-  if(!books.length) {
-    grid.innerHTML = `<div class="empty-state">
-      <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <h3>No Books Yet</h3><p style="font-size:.8rem;margin-top:.4rem">Admin can upload books from the Admin Panel</p>
-    </div>`;
-    return;
-  }
-  grid.innerHTML = books.map(b => `
-    <div class="book-card">
-      ${b.img
-        ? `<div class="book-img"><img src="${b.img}" alt="${b.title}" loading="lazy"></div>`
-        : `<div class="book-img-placeholder"><svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:.7rem">No Cover</span></div>`
-      }
-      <div class="book-info">
-        <div class="book-title">${b.title}</div>
-        ${b.author ? `<div class="book-author">${b.author}</div>` : ''}
-        ${b.cat ? `<span class="book-tag">${b.cat}</span>` : ''}
-      </div>
-    </div>
-  `).join('');
+    const grid = document.getElementById('books-grid');
+    if(books.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:5rem; color:var(--text-muted);">No books available in the cloud.</div>`;
+        return;
+    }
+    grid.innerHTML = books.map(b => `
+        <div class="book-card">
+            <div class="book-img">${b.img ? `<img src="${b.img}" loading="lazy">` : `<span style="opacity:0.2">NO COVER</span>`}</div>
+            <div class="book-info">
+                <div class="book-title">${b.title}</div>
+                <div class="book-author">${b.author || 'Unknown Author'}</div>
+            </div>
+        </div>
+    `).join('');
 }
 
-// ── MANAGE BOOKS (admin) ──
 function renderManageBooks() {
-  const el = document.getElementById('manage-books-list');
-  if(!books.length) {
-    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:3rem;font-size:.82rem">No books uploaded yet.</div>`;
-    return;
-  }
-  el.innerHTML = books.map((b,i) => `
-    <div style="background:var(--surface2);border:1px solid rgba(201,168,76,.12);border-radius:4px;overflow:hidden;position:relative;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 8px 30px rgba(0,0,0,.5)'" onmouseout="this.style.boxShadow='none'">
-      ${b.img
-        ? `<img src="${b.img}" alt="${b.title}" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block">`
-        : `<div style="width:100%;aspect-ratio:3/4;background:var(--surface3);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.7rem;flex-direction:column;gap:.5rem">
-             <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:.3"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-             No Cover
-           </div>`
-      }
-      <div style="padding:.75rem .8rem .9rem">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text);line-height:1.3;margin-bottom:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.title}</div>
-        ${b.author ? `<div style="font-size:.68rem;color:var(--gold);letter-spacing:.06em;margin-bottom:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.author}</div>` : '<div style="margin-bottom:.6rem"></div>'}
-        <button class="btn btn-danger" style="width:100%;padding:.5rem;font-size:.68rem;letter-spacing:.12em" onclick="deleteBook(${i})">🗑 Delete</button>
-      </div>
-    </div>
-  `).join('');
+    const list = document.getElementById('manage-books-list');
+    if(books.length === 0) { list.innerHTML = "Inventory empty."; return; }
+    list.innerHTML = books.map((b, i) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:1.2rem; border-bottom:1px solid rgba(255,255,255,0.05);">
+            <div>
+                <div style="font-weight:600;">${b.title}</div>
+                <div style="font-size:0.7rem; color:var(--gold);">${b.author || 'N/A'}</div>
+            </div>
+            <button class="btn btn-danger" style="padding:0.5rem 1rem; font-size:0.6rem;" onclick="deleteBook(${i})">Remove</button>
+        </div>
+    `).join('');
 }
 
-function deleteBook(idx) {
-  playDelete();
-  books.splice(idx, 1);
-  saveBooks();
-  renderBooks();
-  renderManageBooks();
-  toast('Book deleted');
+function deleteBook(i) {
+    if(confirm("Permanently delete this book from cloud?")) {
+        playTone(300, 'sawtooth', 0.2, 0.1);
+        books.splice(i, 1);
+        saveToCloud();
+    }
 }
 
-// ── DELETE ALL ──
-function confirmDeleteAll() {
-  playClick();
-  document.getElementById('delete-modal').classList.add('open');
-}
-function deleteAllBooks() {
-  playDelete();
-  books = [];
-  saveBooks();
-  renderBooks();
-  renderManageBooks();
-  closeModal();
-  toast('All books deleted');
-}
-
-// ── STUDENTS ──
 function addStudent() {
-  const name = document.getElementById('stu-name').value.trim();
-  const roll = document.getElementById('stu-roll').value.trim();
-  if(!name || !roll) { playError(); toast('Please enter both name and roll number','warn'); return; }
-  students.push({ name, roll, status: true });
-  saveStudents();
-  renderStudents();
-  playSuccess();
-  toast('Student added successfully');
-  document.getElementById('stu-name').value = '';
-  document.getElementById('stu-roll').value = '';
+    const name = document.getElementById('stu-name').value.trim();
+    const roll = document.getElementById('stu-roll').value.trim();
+    if(name && roll) {
+        students.push({ name, roll });
+        saveToCloud();
+        chime();
+        document.getElementById('stu-name').value = '';
+        document.getElementById('stu-roll').value = '';
+    } else { errorSound(); toast("Complete all fields", "err"); }
 }
 
 function renderStudents() {
-  const tbody = document.getElementById('students-tbody');
-  if(!students.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.8rem">No students added yet</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = students.map((s,i) => `
-    <tr>
-      <td style="color:var(--text-muted)">${i+1}</td>
-      <td>${s.name}</td>
-      <td style="color:var(--gold);font-family:monospace">${s.roll}</td>
-      <td>
-        <span class="status-badge ${s.status ? 'ok':'warn'}">
-          ${s.status ? '✓ Active' : '✗ Inactive'}
-        </span>
-      </td>
-      <td style="display:flex;gap:.3rem;flex-wrap:wrap">
-        <button class="icon-btn" onclick="toggleStatus(${i})" title="Toggle Status">${s.status ? '✓':'✗'}</button>
-        <button class="icon-btn" onclick="openEditStudent(${i})" title="Edit">✏️</button>
-        <button class="icon-btn" onclick="deleteStudent(${i})" title="Delete">🗑</button>
-      </td>
-    </tr>
-  `).join('');
+    const tbody = document.getElementById('students-tbody');
+    if(students.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No students registered.</td></tr>`; return; }
+    tbody.innerHTML = students.map((s, i) => `
+        <tr>
+            <td style="font-weight:600;">${s.name}</td>
+            <td style="font-family:monospace; color:var(--gold);">${s.roll}</td>
+            <td style="text-align:right;"><button class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.6rem;" onclick="deleteStudent(${i})">Delete</button></td>
+        </tr>
+    `).join('');
 }
 
-function toggleStatus(idx) {
-  playClick();
-  students[idx].status = !students[idx].status;
-  saveStudents();
-  renderStudents();
+function deleteStudent(i) {
+    playTone(300, 'sawtooth', 0.2, 0.1);
+    students.splice(i, 1);
+    saveToCloud();
 }
 
-function deleteStudent(idx) {
-  playDelete();
-  students.splice(idx,1);
-  saveStudents();
-  renderStudents();
-  toast('Student removed');
-}
-
-function openEditStudent(idx) {
-  playClick();
-  editingStudentIdx = idx;
-  document.getElementById('edit-name').value = students[idx].name;
-  document.getElementById('edit-roll').value = students[idx].roll;
-  document.getElementById('edit-modal').classList.add('open');
-}
-
-function saveEditStudent() {
-  const name = document.getElementById('edit-name').value.trim();
-  const roll = document.getElementById('edit-roll').value.trim();
-  if(!name||!roll){ playError(); return; }
-  students[editingStudentIdx].name = name;
-  students[editingStudentIdx].roll = roll;
-  saveStudents();
-  renderStudents();
-  closeModal();
-  playSuccess();
-  toast('Student updated');
-}
-
-// ── MODAL ──
-function closeModal() {
-  playClick();
-  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
-}
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => { if(e.target===overlay) closeModal(); });
-});
-
-// ── PASSWORD CHANGE ──
-function changePassword() {
-  const cur = document.getElementById('cur-pass').value;
-  const nw = document.getElementById('new-pass').value;
-  const cf = document.getElementById('conf-pass').value;
-  const msg = document.getElementById('pass-msg');
-  if(cur !== adminPassword) { playError(); msg.style.color='var(--danger)'; msg.textContent='Incorrect current password.'; msg.style.display='block'; return; }
-  if(nw.length < 6) { playError(); msg.style.color='var(--danger)'; msg.textContent='New password must be at least 6 characters.'; msg.style.display='block'; return; }
-  if(nw !== cf) { playError(); msg.style.color='var(--danger)'; msg.textContent='Passwords do not match.'; msg.style.display='block'; return; }
-  adminPassword = nw;
-  playSuccess();
-  msg.style.color='var(--success)'; msg.textContent='Password updated successfully!'; msg.style.display='block';
-  document.getElementById('cur-pass').value = '';
-  document.getElementById('new-pass').value = '';
-  document.getElementById('conf-pass').value = '';
-  setTimeout(() => { msg.style.display='none'; }, 3000);
-}
-
-// ── TOAST ──
-function toast(msg, type='ok') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.borderLeftColor = type==='warn' ? 'var(--warn)' : type==='err' ? 'var(--danger)' : 'var(--gold)';
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2800);
-}
-
-// ── PERSIST ──
-function saveBooks() { localStorage.setItem('crp_books', JSON.stringify(books)); }
-function saveStudents() { localStorage.setItem('crp_students', JSON.stringify(students)); }
-
-// ── Sound on all buttons ──
-document.addEventListener('click', e => {
-  if(e.target.matches('.btn, .tab-btn, .nav-link, .icon-btn, .enter-btn')) {
-    // sound handled individually, skip double
-  }
-});
-
-// ── DRAG ON UPLOAD ──
-const ua = document.getElementById('upload-area');
-if(ua) {
-  ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag'); });
-  ua.addEventListener('dragleave', () => ua.classList.remove('drag'));
-  ua.addEventListener('drop', e => {
-    e.preventDefault(); ua.classList.remove('drag');
-    const file = e.dataTransfer.files[0];
-    if(file && file.type.startsWith('image/')) {
-      const input = document.getElementById('book-img-input');
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      input.files = dt.files;
-      previewImg(input);
+function adminLogin() {
+    const pass = document.getElementById('admin-pass').value;
+    if(pass === adminPassword) {
+        chime();
+        document.getElementById('admin-login').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+    } else {
+        errorSound();
+        toast("Access Denied: Invalid Credentials", "err");
+        document.getElementById('admin-pass').value = '';
     }
-  });
+}
+
+function adminLogout() {
+    clickSound();
+    document.getElementById('admin-login').style.display = 'block';
+    document.getElementById('admin-dashboard').style.display = 'none';
+    document.getElementById('admin-pass').value = '';
+}
+
+function toast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    t.style.borderLeftColor = type === 'err' ? 'var(--danger)' : 'var(--gold)';
+    setTimeout(() => t.style.display = 'none', 3500);
 }
 </script>
 </body>
