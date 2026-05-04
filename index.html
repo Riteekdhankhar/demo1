@@ -45,6 +45,7 @@
 <div id="splash" onclick="closeSplash()">
   <h1 class="splash-title">CHHOTU RAM<br>POLYTECHNIC</h1>
   <p style="color:var(--gold2); letter-spacing: 0.3em;">LIBRARY PORTAL</p>
+  <p style="margin-top:20px; font-size: 0.8rem; color: var(--muted);">✦ TAP TO START ✦</p>
 </div>
 
 <div id="choice">
@@ -57,8 +58,8 @@
 
 <div id="app">
   <div class="topbar">
-    <div style="color:var(--gold); font-weight:bold;">CRP LIBRARY</div>
-    <button onclick="goBack()" style="background:none; color:var(--gold); border:1px solid var(--gold); padding:5px 10px; cursor:pointer;">← Back</button>
+    <div style="color:var(--gold); font-weight:bold;">CRP LIBRARY SYSTEM</div>
+    <button onclick="goBack()" style="background:none; color:var(--gold); border:1px solid var(--gold); padding:5px 10px; cursor:pointer; border-radius:5px;">← Back</button>
   </div>
   <div class="layout">
     <div class="sidebar">
@@ -67,29 +68,29 @@
     </div>
     <div class="content">
       
-      <!-- BOOK MANAGEMENT -->
+      <!-- INVENTORY SECTION -->
       <div class="section active" id="sec-addBook">
-        <h2>Inventory Management</h2>
+        <h2>Book Inventory</h2>
         <div class="card form-group">
           <input type="text" id="b_acc" placeholder="Accession No">
           <input type="text" id="b_title" placeholder="Book Title">
-          <button class="btn-primary" onclick="addBook()">✦ Add Single Book</button>
+          <button class="btn-primary" onclick="addBook()">✦ Add Manual Entry</button>
         </div>
         <div class="card">
-          <h3>Import Inventory (.csv/.xlsx)</h3>
+          <h3>Import Book List (.csv/.xlsx)</h3>
           <div class="upload-zone" onclick="document.getElementById('bookInput').click()">
-            <div style="font-size:1.5rem;">📁</div><p>Upload Books File</p>
+            <div style="font-size:1.5rem;">📁</div><p>Click to Upload Books</p>
           </div>
           <input type="file" id="bookInput" accept=".xlsx, .csv" style="display:none" onchange="importFile(this, 'library/books')">
         </div>
         <div id="allBooksTable" class="card"></div>
       </div>
 
-      <!-- ISSUE BOOK SECTION (UPLOAD ADDED HERE) -->
+      <!-- ISSUE BOOK SECTION -->
       <div class="section" id="sec-issueBook">
-        <h2>Issue Management</h2>
+        <h2>Issue & Return</h2>
         <div class="card form-group">
-          <input type="text" id="i_roll" placeholder="Roll Number">
+          <input type="text" id="i_roll" placeholder="Student Roll Number">
           <input type="text" id="i_name" placeholder="Student Name">
           <input type="text" id="i_book" placeholder="Book Title/Acc No">
           <button class="btn-primary" onclick="issueBook()">✦ Single Issue</button>
@@ -97,16 +98,16 @@
 
         <div class="card">
           <h3>Batch Issue Upload (.csv/.xlsx)</h3>
-          <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 5px;">Columns needed: Roll No, Name, Book</p>
+          <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 5px;">Columns required: Roll No, Name, Book</p>
           <div class="upload-zone" onclick="document.getElementById('issueInput').click()">
-            <div style="font-size:1.5rem;">📤</div><p>Upload Issue List</p>
+            <div style="font-size:1.5rem;">📤</div><p>Upload Issue Data</p>
           </div>
           <input type="file" id="issueInput" accept=".xlsx, .csv" style="display:none" onchange="importFile(this, 'library/issued')">
           <div id="importStatus" style="display:none; margin-top:10px; color:var(--success); font-weight:bold;"></div>
         </div>
 
         <div id="issuedTableWrap" class="card">
-          <h3>Issued Records</h3>
+          <h3>Issue History</h3>
           <div id="issuedTableDiv"></div>
         </div>
       </div>
@@ -117,11 +118,13 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- SheetJS & Firebase Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+  // Configuration from your Firebase setup
   const firebaseConfig = {
     apiKey: "AIzaSyDtMEGg6jmGTTgfkq_TQXFq0YmCf0L82J4",
     authDomain: "crp-library-e47e6.firebaseapp.com",
@@ -138,7 +141,7 @@
   let books = [];
   let issued = [];
 
-  // SYNC
+  // Listeners for Real-time Updates
   onValue(ref(db, 'library/books'), (s) => {
     books = s.val() ? Object.entries(s.val()).map(([id, v]) => ({ id, ...v })) : [];
     renderAllBooks();
@@ -149,7 +152,7 @@
     renderIssued();
   });
 
-  // UPLOAD LOGIC
+  // Batch Importer for CSV/Excel
   window.importFile = (input, path) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -160,16 +163,19 @@
 
         data.forEach(row => {
           let payload = {};
+          // Logic for Inventory Import
           if (path.includes('books')) {
             payload = { 
-              acc: row["ACC.NO."] || row["Accession No"] || "", 
-              title: row["TITLE"] || row["Title"] || "", 
-              author: row["AUTHOR"] || row["Author"] || "" 
+              acc: row["ACC.NO."] || row["Accession No"] || row["acc"] || "", 
+              title: row["TITLE"] || row["Title"] || row["title"] || "", 
+              author: row["AUTHOR"] || row["Author"] || row["author"] || "" 
             };
-          } else if (path.includes('issued')) {
+          } 
+          // Logic for Batch Issue Import
+          else if (path.includes('issued')) {
             payload = { 
-              roll: row["Roll No"] || row["ROLL"] || "", 
-              name: row["Name"] || row["NAME"] || "", 
+              roll: row["Roll No"] || row["ROLL"] || row["roll"] || "", 
+              name: row["Name"] || row["NAME"] || row["name"] || "", 
               book: row["Book"] || row["BOOK"] || row["TITLE"] || "",
               status: "Issued",
               date: new Date().toLocaleDateString()
@@ -182,51 +188,54 @@
           }
         });
 
-        document.getElementById('importStatus').style.display = 'block';
-        document.getElementById('importStatus').innerText = `✅ Successfully issued/imported ${count} items!`;
-        showToast("Sync Complete!");
+        const statusEl = document.getElementById('importStatus');
+        statusEl.style.display = 'block';
+        statusEl.innerText = `✅ Processed ${count} records successfully!`;
+        showToast("Cloud Sync Complete!");
       } catch (err) {
-        alert("Error processing file. Please check columns.");
+        alert("Check your file format and columns.");
       }
     };
     reader.readAsArrayBuffer(input.files[0]);
   };
 
-  // SINGLE ACTIONS
+  // Add Book
   window.addBook = () => {
     const acc = document.getElementById('b_acc').value;
     const title = document.getElementById('b_title').value;
-    if(!title) return showToast("Title Required");
+    if(!title) return showToast("❌ Missing Title");
     push(ref(db, 'library/books'), { acc, title });
-    showToast("Synced!");
+    showToast("✅ Synced!");
+    document.getElementById('b_acc').value = ''; document.getElementById('b_title').value = '';
   };
 
+  // Single Issue
   window.issueBook = () => {
     const roll = document.getElementById('i_roll').value;
     const name = document.getElementById('i_name').value;
     const book = document.getElementById('i_book').value;
-    if(!roll || !book) return showToast("Roll & Book Required");
+    if(!roll || !book) return showToast("❌ Roll & Book Required");
     push(ref(db, 'library/issued'), { roll, name, book, status: "Issued", date: new Date().toLocaleDateString() });
-    showToast("Issued recorded!");
+    showToast("✅ Record Saved!");
     document.getElementById('i_roll').value = ''; document.getElementById('i_book').value = '';
   };
 
-  window.deleteItem = (path, id) => { if(confirm("Delete entry?")) remove(ref(db, `library/${path}/${id}`)); };
+  window.deleteItem = (path, id) => { if(confirm("Delete this?")) remove(ref(db, `library/${path}/${id}`)); };
 
-  // RENDERS
+  // Rendering
   function renderAllBooks() {
     const div = document.getElementById('allBooksTable');
-    div.innerHTML = `<h3>Inventory List</h3><table><tr><th>Acc</th><th>Title</th><th>Del</th></tr>` + 
-      books.map(b => `<tr><td>${b.acc}</td><td>${b.title}</td><td><button onclick="deleteItem('books','${b.id}')">X</button></td></tr>`).join('') + `</table>`;
+    div.innerHTML = `<table><tr><th>Acc No</th><th>Book Title</th><th>Action</th></tr>` + 
+      books.map(b => `<tr><td>${b.acc}</td><td>${b.title}</td><td><button onclick="deleteItem('books','${b.id}')">Del</button></td></tr>`).join('') + `</table>`;
   }
 
   function renderIssued() {
     const div = document.getElementById('issuedTableDiv');
-    div.innerHTML = `<table><tr><th>Roll</th><th>Name</th><th>Book</th><th>Action</th></tr>` + 
+    div.innerHTML = `<table><tr><th>Roll</th><th>Student</th><th>Book</th><th>Action</th></tr>` + 
       issued.map(i => `<tr><td>${i.roll}</td><td>${i.name}</td><td>${i.book}</td><td><button onclick="deleteItem('issued','${i.id}')">Return</button></td></tr>`).join('') + `</table>`;
   }
 
-  // NAVIGATION
+  // Navigation Utilities
   window.closeSplash = () => { document.getElementById('splash').style.display = 'none'; document.getElementById('choice').classList.add('active'); };
   window.openAdmin = () => { document.getElementById('choice').classList.remove('active'); document.getElementById('app').classList.add('active'); };
   window.openPublic = () => { document.getElementById('choice').classList.remove('active'); document.getElementById('app').classList.add('active'); };
