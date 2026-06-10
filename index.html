@@ -1,1724 +1,1749 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chhotu Ram Polytechnic – Library Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Jost:wght@200;300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<style>
-/* ===== CSS VARIABLES & RESET ===== */
-:root {
-  --cream: #f5efe6;
-  --beige: #e8ddd0;
-  --warm: #d4c5b0;
-  --gold: #b8965a;
-  --gold-light: #d4aa6e;
-  --brown: #6b4f35;
-  --dark: #2c1f14;
-  --text: #3a2e24;
-  --text-light: #7a6a58;
-  --white: #fdfaf6;
-  --shadow: rgba(44,31,20,0.12);
-  --shadow-deep: rgba(44,31,20,0.25);
-  --border: rgba(184,150,90,0.3);
-  --success: #4a7c59;
-  --danger: #8b3a3a;
-  --info: #3a5f7a;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: 'Jost', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  overflow-x: hidden;
-  min-height: 100vh;
-}
-
-/* ===== PAGES ===== */
-.page {
-  display: none;
-  min-height: 100vh;
-  animation: pageFadeIn 0.6s ease forwards;
-}
-.page.active { display: flex; flex-direction: column; }
-
-@keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== LOADING SCREEN ===== */
-#loading-screen {
-  position: fixed; inset: 0;
-  background: var(--dark);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9999;
-  flex-direction: column; gap: 1rem;
-  transition: opacity 0.8s ease;
-}
-#loading-screen.fade-out { opacity: 0; pointer-events: none; }
-
-.loader-ring {
-  width: 60px; height: 60px;
-  border: 3px solid rgba(184,150,90,0.2);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-#loading-msg { color: var(--gold); font-size: 0.8rem; letter-spacing: 0.15em; opacity: 0.7; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ===== FIREBASE STATUS BADGE ===== */
-#fb-status {
-  position: fixed; top: 0.75rem; right: 1rem;
-  z-index: 9000;
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.7rem; letter-spacing: 0.08em;
-  padding: 0.3rem 0.7rem;
-  border-radius: 20px;
-  background: rgba(44,31,20,0.85);
-  border: 1px solid rgba(184,150,90,0.3);
-  color: var(--text-light);
-  backdrop-filter: blur(4px);
-  transition: all 0.3s ease;
-}
-#fb-status .dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #888;
-  transition: background 0.3s;
-}
-#fb-status.connected .dot { background: #4caf50; animation: pulse-green 2s infinite; }
-#fb-status.connected { color: #a8d8a8; }
-#fb-status.error .dot { background: var(--danger); }
-#fb-status.error { color: #d8a8a8; }
-@keyframes pulse-green {
-  0%,100%{ box-shadow:0 0 0 0 rgba(76,175,80,0.4); }
-  50%{ box-shadow:0 0 0 4px rgba(76,175,80,0); }
-}
-
-/* ===== LANDING PAGE ===== */
-#landing {
-  background: linear-gradient(145deg, #f5efe6 0%, #e8ddd0 40%, #d4c5b0 100%);
-  align-items: center; justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-#landing::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at 20% 20%, rgba(184,150,90,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(107,79,53,0.06) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-#landing::after {
-  content: '';
-  position: absolute;
-  top: 30px; left: 30px; right: 30px; bottom: 30px;
-  border: 1px solid rgba(184,150,90,0.25);
-  pointer-events: none;
-}
-
-.landing-inner { position: relative; z-index: 1; padding: 2rem; }
-
-.college-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2.4rem, 7vw, 7rem);
-  font-weight: 700;
-  color: var(--dark);
-  line-height: 1.05;
-  letter-spacing: 0.04em;
-  overflow: hidden;
-}
-
-.college-name .word {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(80px);
-  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
-  margin: 0 0.15em;
-}
-.college-name .word.visible {
-  opacity: 1; transform: translateY(0);
-}
-
-.library-title {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(1.2rem, 3.5vw, 2.8rem);
-  color: var(--gold);
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  margin-top: 0.5rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease 0.1s, transform 0.8s ease 0.1s;
-}
-.library-title.visible { opacity: 1; transform: translateY(0); }
-
-.gold-line {
-  width: 80px; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  margin: 1.5rem auto;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.gold-line.visible { opacity: 1; }
-
-.tap-hint {
-  font-family: 'Jost', sans-serif;
-  font-weight: 300;
-  font-size: clamp(0.75rem, 1.5vw, 0.95rem);
-  color: var(--text-light);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0;
-  animation: blink 2s ease-in-out infinite;
-}
-.tap-hint.visible { opacity: 1; }
-
-@keyframes blink {
-  0%,100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-/* ===== OPTION SCREEN ===== */
-#options {
-  background: linear-gradient(145deg, #f5efe6, #e8ddd0);
-  align-items: center; justify-content: center;
-  flex-direction: column;
-  gap: 2.5rem;
-  padding: 2rem;
-  position: relative;
-}
-#options::after {
-  content: '';
-  position: absolute;
-  top: 25px; left: 25px; right: 25px; bottom: 25px;
-  border: 1px solid rgba(184,150,90,0.2);
-  pointer-events: none;
-}
-
-.options-header { text-align: center; }
-.options-header h2 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.4rem, 4vw, 2.5rem);
-  font-weight: 600;
-  color: var(--dark);
-  letter-spacing: 0.05em;
-}
-.options-header p {
-  font-weight: 300;
-  color: var(--text-light);
-  font-size: 0.9rem;
-  letter-spacing: 0.12em;
-  margin-top: 0.4rem;
-}
-
-.option-cards {
-  display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
-}
-
-.option-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2.5rem 3rem;
-  text-align: center;
-  cursor: pointer;
-  width: 220px;
-  transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
-  box-shadow: 0 4px 24px var(--shadow);
-  position: relative;
-  overflow: hidden;
-}
-.option-card::before {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--gold), var(--gold-light));
-  transform: scaleX(0);
-  transition: transform 0.35s ease;
-}
-.option-card:hover::before { transform: scaleX(1); }
-.option-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 48px var(--shadow-deep);
-}
-.option-card i {
-  font-size: 2.2rem;
-  color: var(--gold);
-  margin-bottom: 1rem;
-  display: block;
-}
-.option-card h3 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--dark);
-  letter-spacing: 0.06em;
-}
-.option-card p {
-  font-size: 0.75rem;
-  color: var(--text-light);
-  margin-top: 0.4rem;
-  font-weight: 300;
-  letter-spacing: 0.08em;
-}
-
-/* ===== SHARED NAV HEADER ===== */
-.page-header {
-  background: var(--dark);
-  padding: 1rem 2rem;
-  display: flex; align-items: center; gap: 1rem;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
-}
-.page-header h1 {
-  font-family: 'Cormorant Garamond', serif;
-  color: var(--white);
-  font-size: clamp(1rem, 2.5vw, 1.5rem);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  flex: 1;
-}
-.page-header h1 span { color: var(--gold); }
-.btn-back {
-  background: transparent;
-  border: 1px solid rgba(184,150,90,0.4);
-  color: var(--gold);
-  padding: 0.45rem 1rem;
-  border-radius: 3px;
-  cursor: pointer;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
-  transition: all 0.25s ease;
-  display: flex; align-items: center; gap: 0.5rem;
-}
-.btn-back:hover { background: rgba(184,150,90,0.12); }
-
-/* ===== CONTENT AREA ===== */
-.page-content {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1300px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-/* ===== SEARCH BAR ===== */
-.search-wrap {
-  margin-bottom: 1.5rem;
-  position: relative;
-}
-.search-wrap input {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.8rem;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  background: var(--white);
-  font-family: 'Jost', sans-serif;
-  font-size: 0.9rem;
-  color: var(--text);
-  outline: none;
-  transition: border 0.25s ease, box-shadow 0.25s ease;
-}
-.search-wrap input:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(184,150,90,0.1);
-}
-.search-wrap i {
-  position: absolute;
-  left: 0.9rem; top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-light);
-  font-size: 0.9rem;
-}
-
-/* ===== TABLE ===== */
-.table-wrap {
-  overflow-x: auto;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  box-shadow: 0 4px 20px var(--shadow);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-thead tr {
-  background: var(--dark);
-}
-thead th {
-  padding: 0.9rem 1rem;
-  text-align: left;
-  color: var(--gold);
-  font-family: 'Jost', sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-tbody tr {
-  border-bottom: 1px solid rgba(184,150,90,0.1);
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-tbody tr:hover { background: rgba(184,150,90,0.06); }
-tbody tr:last-child { border-bottom: none; }
-td {
-  padding: 0.85rem 1rem;
-  color: var(--text);
-  vertical-align: middle;
-}
-td:first-child { color: var(--gold); font-weight: 500; }
-
-.badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 2px;
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-}
-.badge-green { background: rgba(74,124,89,0.12); color: var(--success); }
-.badge-red   { background: rgba(139,58,58,0.12); color: var(--danger); }
-.badge-gold  { background: rgba(184,150,90,0.12); color: var(--gold); }
-
-/* ===== BUTTONS ===== */
-.btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.6rem 1.3rem;
-  border: none; border-radius: 3px;
-  cursor: pointer;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: all 0.25s ease;
-}
-.btn-primary {
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
-  color: var(--dark);
-  box-shadow: 0 4px 14px rgba(184,150,90,0.3);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(184,150,90,0.4); }
-.btn-dark { background: var(--dark); color: var(--gold); }
-.btn-dark:hover { background: #3d2d1e; }
-.btn-danger { background: var(--danger); color: #fff; }
-.btn-danger:hover { background: #7a2f2f; }
-.btn-success { background: var(--success); color: #fff; }
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
-
-/* ===== FORMS ===== */
-.form-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px var(--shadow);
-  max-width: 700px;
-}
-.form-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--dark);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 0.6rem;
-}
-.form-title i { color: var(--gold); font-size: 1.2rem; }
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-
-.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-.form-group.full { grid-column: 1/-1; }
-
-label {
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-light);
-  font-weight: 500;
-}
-input, select, textarea {
-  padding: 0.65rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  background: var(--cream);
-  font-family: 'Jost', sans-serif;
-  font-size: 0.9rem;
-  color: var(--text);
-  outline: none;
-  transition: border 0.25s ease, box-shadow 0.25s ease;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(184,150,90,0.1);
-  background: var(--white);
-}
-select { cursor: pointer; }
-textarea { resize: vertical; min-height: 80px; }
-
-.file-upload-area {
-  border: 2px dashed var(--border);
-  border-radius: 4px;
-  padding: 2rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  background: rgba(184,150,90,0.03);
-}
-.file-upload-area:hover {
-  border-color: var(--gold);
-  background: rgba(184,150,90,0.06);
-}
-.file-upload-area i { font-size: 2rem; color: var(--gold); margin-bottom: 0.5rem; display: block; }
-.file-upload-area p { font-size: 0.85rem; color: var(--text-light); }
-.file-upload-area input[type="file"] { display: none; }
-
-/* ===== ADMIN PANEL ===== */
-#admin-login-wrap {
-  display: flex; align-items: center; justify-content: center;
-  flex: 1; padding: 2rem;
-}
-.login-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3rem 2.5rem;
-  width: 100%; max-width: 400px;
-  text-align: center;
-  box-shadow: 0 8px 40px var(--shadow);
-}
-.login-card .lock-icon {
-  font-size: 2.5rem;
-  color: var(--gold);
-  margin-bottom: 1rem;
-}
-.login-card h2 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.8rem;
-  color: var(--dark);
-  margin-bottom: 0.4rem;
-}
-.login-card p { color: var(--text-light); font-size: 0.85rem; margin-bottom: 2rem; }
-.login-card input {
-  width: 100%;
-  margin-bottom: 1rem;
-  text-align: center;
-  letter-spacing: 0.15em;
-}
-.login-error { color: var(--danger); font-size: 0.82rem; margin-top: 0.5rem; display: none; }
-
-/* Admin Dashboard */
-#admin-dashboard { display: none; flex-direction: column; flex: 1; }
-
-.admin-nav {
-  background: var(--dark);
-  padding: 1rem 2rem;
-  display: flex; gap: 0.75rem; flex-wrap: wrap;
-  border-bottom: 1px solid rgba(184,150,90,0.2);
-}
-.nav-tab {
-  background: transparent;
-  border: 1px solid transparent;
-  color: rgba(245,239,230,0.6);
-  padding: 0.5rem 1rem;
-  border-radius: 3px;
-  cursor: pointer;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: all 0.25s ease;
-  display: flex; align-items: center; gap: 0.4rem;
-}
-.nav-tab:hover { color: var(--gold); border-color: rgba(184,150,90,0.3); }
-.nav-tab.active { color: var(--gold); border-color: var(--gold); background: rgba(184,150,90,0.1); }
-
-.admin-tab-content { display: none; flex: 1; padding: 2rem; }
-.admin-tab-content.active { display: block; }
-
-/* Stats cards */
-.stats-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem; margin-bottom: 2rem;
-}
-.stat-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1.25rem 1.5rem;
-  text-align: center;
-  box-shadow: 0 2px 12px var(--shadow);
-}
-.stat-card .stat-num {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--gold);
-  line-height: 1;
-}
-.stat-card .stat-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-light);
-  margin-top: 0.35rem;
-}
-
-/* ===== MODAL ===== */
-.modal-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(44,31,20,0.65);
-  z-index: 1000;
-  align-items: center; justify-content: center;
-  padding: 1rem;
-  backdrop-filter: blur(4px);
-}
-.modal-overlay.open { display: flex; animation: modalIn 0.3s ease; }
-
-@keyframes modalIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.modal {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 2rem;
-  max-width: 480px; width: 100%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  animation: modalSlide 0.35s cubic-bezier(0.16,1,0.3,1);
-}
-@keyframes modalSlide {
-  from { transform: translateY(30px) scale(0.96); }
-  to   { transform: translateY(0) scale(1); }
-}
-.modal-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  margin-bottom: 1.5rem;
-}
-.modal-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.4rem;
-  color: var(--dark);
-}
-.modal-close {
-  background: none; border: none; cursor: pointer;
-  font-size: 1.2rem; color: var(--text-light);
-  padding: 0.2rem; line-height: 1;
-  transition: color 0.2s;
-}
-.modal-close:hover { color: var(--danger); }
-.modal-body { font-size: 0.9rem; color: var(--text); }
-.modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
-
-/* Book confirm modal */
-.book-confirm-info {
-  background: var(--cream);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1rem;
-}
-.book-confirm-info .book-cname {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--dark);
-  margin-bottom: 0.3rem;
-}
-.book-confirm-info .book-cprice {
-  color: var(--gold);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-/* Toast */
-.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
-.toast {
-  background: var(--dark);
-  color: var(--white);
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  border-left: 3px solid var(--gold);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  animation: toastIn 0.4s cubic-bezier(0.16,1,0.3,1);
-  max-width: 300px;
-}
-.toast.success { border-left-color: var(--success); }
-.toast.error   { border-left-color: var(--danger); }
-@keyframes toastIn {
-  from { opacity: 0; transform: translateX(30px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-/* ===== PRINT STYLES ===== */
-@media print {
-  .page-header, .btn-back, .admin-nav, .btn, .search-wrap, .no-print, #fb-status { display: none !important; }
-  .page-content { padding: 0; max-width: 100%; }
-  .table-wrap { box-shadow: none; border: 1px solid #999; }
-  body { background: white; }
-}
-
-/* ===== RESPONSIVE FIXES ===== */
-@media (max-width: 768px) {
-  .page-content { padding: 1rem; }
-  .form-card { padding: 1.25rem; }
-  .option-card { width: 160px; padding: 1.75rem 1.5rem; }
-  .admin-nav { padding: 0.75rem 1rem; }
-  .page-header { padding: 0.75rem 1rem; }
-  #landing::after { top: 15px; left: 15px; right: 15px; bottom: 15px; }
-}
-
-/* ===== EMPTY STATE ===== */
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: var(--text-light);
-}
-.empty-state i { font-size: 3rem; color: var(--warm); margin-bottom: 1rem; }
-.empty-state p { font-size: 0.9rem; }
-
-/* ===== ACTION ROW ===== */
-.action-row {
-  display: flex; gap: 0.75rem; flex-wrap: wrap;
-  margin-bottom: 1.25rem; align-items: center;
-}
-.section-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.6rem; font-weight: 600;
-  color: var(--dark);
-  margin-bottom: 1.25rem;
-  display: flex; align-items: center; gap: 0.6rem;
-}
-.section-title i { color: var(--gold); font-size: 1.3rem; }
-
-.tbl-btn {
-  background: none; border: none; cursor: pointer;
-  font-size: 0.78rem; font-family: 'Jost', sans-serif;
-  font-weight: 500; letter-spacing: 0.05em;
-  padding: 0.3rem 0.7rem;
-  border-radius: 2px;
-  transition: all 0.2s ease;
-}
-.tbl-btn-danger { color: var(--danger); border: 1px solid rgba(139,58,58,0.25); }
-.tbl-btn-danger:hover { background: rgba(139,58,58,0.08); }
-.tbl-btn-info { color: var(--info); border: 1px solid rgba(58,95,122,0.25); }
-.tbl-btn-info:hover { background: rgba(58,95,122,0.08); }
-
-/* Sync indicator */
-.syncing { opacity: 0.6; pointer-events: none; }
-.sync-spinner {
-  display: inline-block; width: 12px; height: 12px;
-  border: 2px solid rgba(184,150,90,0.3);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  margin-left: 0.4rem;
-  vertical-align: middle;
-}
-</style>
-</head>
-<body>
-
-<!-- Firebase Status Badge -->
-<div id="fb-status">
-  <div class="dot"></div>
-  <span id="fb-status-text">Connecting…</span>
-</div>
-
-<!-- ===== LOADING SCREEN ===== -->
-<div id="loading-screen">
-  <div class="loader-ring"></div>
-  <div id="loading-msg">CONNECTING TO FIREBASE…</div>
-</div>
-
-<!-- ===== TOAST CONTAINER ===== -->
-<div class="toast-container" id="toast-container"></div>
-
-<!-- =============================
-     PAGE 1: LANDING
-     ============================= -->
-<div id="landing" class="page" onclick="handleLandingTap()">
-  <div class="landing-inner">
-    <div class="college-name" id="college-name">
-      <span class="word" data-word="CHHOTU">CHHOTU</span>
-      <span class="word" data-word="RAM">RAM</span>
-      <span class="word" data-word="POLYTECHNIC">POLYTECHNIC</span>
-    </div>
-    <div class="library-title" id="library-title">Library</div>
-    <div class="gold-line" id="gold-line"></div>
-    <div class="tap-hint" id="tap-hint">✦ Tap anywhere to continue ✦</div>
-  </div>
-</div>
-
-<!-- =============================
-     PAGE 2: OPTIONS
-     ============================= -->
-<div id="options" class="page">
-  <div class="options-header">
-    <h2>Chhotu Ram Polytechnic</h2>
-    <p>— Library Management System —</p>
-  </div>
-  <div class="option-cards">
-    <div class="option-card" onclick="clickSound(); showPage('admin')">
-      <i class="fas fa-shield-alt"></i>
-      <h3>Admin Panel</h3>
-      <p>Manage books &amp; students</p>
-    </div>
-    <div class="option-card" onclick="clickSound(); showPage('books')">
-      <i class="fas fa-book-open"></i>
-      <h3>All Library Books</h3>
-      <p>Browse the collection</p>
-    </div>
-  </div>
-</div>
-
-<!-- =============================
-     PAGE 3: ALL LIBRARY BOOKS
-     ============================= -->
-<div id="books" class="page">
-  <div class="page-header">
-    <button class="btn-back" onclick="clickSound(); showPage('options')"><i class="fas fa-chevron-left"></i> Back</button>
-    <h1>Library <span>Collection</span></h1>
-  </div>
-  <div class="page-content">
-    <div class="action-row">
-      <div class="search-wrap" style="flex:1; margin:0">
-        <i class="fas fa-search"></i>
-        <input type="text" id="books-search" placeholder="Search by title, author, publisher…" oninput="renderBooksTable()">
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table id="books-table">
-        <thead>
-          <tr>
-            <th>Accession No</th>
-            <th>Book Title</th>
-            <th>Author Name</th>
-            <th>Publisher</th>
-            <th>Quantity</th>
-            <th>Price (₹)</th>
-          </tr>
-        </thead>
-        <tbody id="books-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- =============================
-     PAGE 4: ADMIN
-     ============================= -->
-<div id="admin" class="page">
-  <div class="page-header">
-    <button class="btn-back" onclick="clickSound(); adminLogout()"><i class="fas fa-chevron-left"></i> Back</button>
-    <h1>Admin <span>Panel</span></h1>
-    <span id="admin-logged-badge" style="color:var(--gold);font-size:0.78rem;letter-spacing:0.08em;display:none">● LOGGED IN</span>
-  </div>
-
-  <!-- Login form -->
-  <div id="admin-login-wrap">
-    <div class="login-card">
-      <div class="lock-icon"><i class="fas fa-lock"></i></div>
-      <h2>Secure Access</h2>
-      <p>Enter administrator password to continue</p>
-      <input type="password" id="admin-password" placeholder="Password" onkeydown="if(event.key==='Enter') adminLogin()">
-      <div id="login-error" class="login-error">Incorrect password. Please try again.</div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1rem" onclick="clickSound();adminLogin()">
-        <i class="fas fa-unlock"></i> Login
-      </button>
-    </div>
-  </div>
-
-  <!-- Dashboard -->
-  <div id="admin-dashboard">
-    <!-- Stats -->
-    <div style="padding:1.25rem 2rem 0">
-      <div class="stats-grid" id="stats-grid"></div>
-    </div>
-    <!-- Tabs -->
-    <div class="admin-nav" id="admin-nav">
-      <button class="nav-tab active" onclick="switchAdminTab('add-books',this)"><i class="fas fa-plus-circle"></i> Add Books</button>
-      <button class="nav-tab" onclick="switchAdminTab('issue-book',this)"><i class="fas fa-hand-holding-heart"></i> Issue Book</button>
-      <button class="nav-tab" onclick="switchAdminTab('write-off',this)"><i class="fas fa-trash-alt"></i> Write-Off</button>
-      <button class="nav-tab" onclick="switchAdminTab('reg-student',this)"><i class="fas fa-user-plus"></i> Register Student</button>
-      <button class="nav-tab" onclick="switchAdminTab('all-students',this)"><i class="fas fa-users"></i> All Students</button>
-      <button class="nav-tab" onclick="switchAdminTab('issued-records',this)"><i class="fas fa-list-check"></i> Issued Records</button>
-    </div>
-
-    <!-- TAB: ADD BOOKS -->
-    <div id="tab-add-books" class="admin-tab-content active">
-      <div class="section-title"><i class="fas fa-book-medical"></i> Add New Book</div>
-      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start">
-        <div class="form-card" style="flex:1;min-width:280px">
-          <div class="form-title"><i class="fas fa-keyboard"></i> Manual Entry</div>
-          <div class="form-grid">
-            <div class="form-group"><label>Accession No *</label><input type="text" id="ab-accno" placeholder="e.g. LIB001"></div>
-            <div class="form-group"><label>Book Title *</label><input type="text" id="ab-title" placeholder="Book Title"></div>
-            <div class="form-group"><label>Author Name *</label><input type="text" id="ab-author" placeholder="Author"></div>
-            <div class="form-group"><label>Publisher Name</label><input type="text" id="ab-publisher" placeholder="Publisher"></div>
-            <div class="form-group"><label>Price (₹)</label><input type="number" id="ab-price" placeholder="0.00" min="0"></div>
-            <div class="form-group"><label>Quantity</label><input type="number" id="ab-qty" placeholder="1" min="0" value="1"></div>
-          </div>
-          <div style="margin-top:1.25rem;display:flex;gap:0.75rem;flex-wrap:wrap">
-            <button class="btn btn-primary" onclick="clickSound();addBook()"><i class="fas fa-plus"></i> Add Book</button>
-            <button class="btn btn-outline" onclick="clickSound();clearAddForm()"><i class="fas fa-redo"></i> Clear</button>
-            <button class="btn btn-dark" onclick="clickSound();resetToSeedBooks()" title="Reload all 1299 original books"><i class="fas fa-database"></i> Reload All 1299 Books</button>
-          </div>
-        </div>
-        <div class="form-card" style="flex:1;min-width:280px">
-          <div class="form-title"><i class="fas fa-file-excel"></i> Excel Upload</div>
-          <p style="font-size:0.83rem;color:var(--text-light);margin-bottom:1.25rem">Upload a <strong>.xlsx</strong> or <strong>.csv</strong> file. Columns must be: Accession No, Book Title, Author Name, Publisher, Price, Quantity</p>
-          <div class="file-upload-area" onclick="document.getElementById('book-excel-file').click()">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Click to choose file or drag &amp; drop</p>
-            <p style="margin-top:0.3rem;font-size:0.75rem">.xlsx or .csv</p>
-            <input type="file" id="book-excel-file" accept=".csv,.xlsx" onchange="handleBookExcel(event)">
-          </div>
-          <div id="excel-book-preview" style="margin-top:1rem"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: ISSUE BOOK -->
-    <div id="tab-issue-book" class="admin-tab-content">
-      <div class="section-title"><i class="fas fa-hand-holding-heart"></i> Issue Book to Student</div>
-      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start">
-        <div class="form-card" style="flex:1;min-width:280px">
-          <div class="form-title"><i class="fas fa-keyboard"></i> Issue Form</div>
-          <div class="form-grid">
-            <div class="form-group"><label>Roll No *</label><input type="text" id="ib-rollno" placeholder="e.g. 22CS01"></div>
-            <div class="form-group"><label>Student Name *</label><input type="text" id="ib-sname" placeholder="Student Name"></div>
-            <div class="form-group"><label>Phone Number</label><input type="tel" id="ib-phone" placeholder="10-digit number"></div>
-            <div class="form-group"><label>Branch</label><input type="text" id="ib-branch" placeholder="e.g. CS, EC, ME"></div>
-            <div class="form-group full"><label>Select Book *</label>
-              <select id="ib-book">
-                <option value="">— Select a book —</option>
-              </select>
-            </div>
-            <div class="form-group"><label>Issue Date</label><input type="date" id="ib-date"></div>
-            <div class="form-group"><label>Return Date</label><input type="date" id="ib-return"></div>
-          </div>
-          <div style="margin-top:1.25rem">
-            <button class="btn btn-primary" onclick="clickSound();issueBook()"><i class="fas fa-check"></i> Issue Book</button>
-          </div>
-        </div>
-        <div class="form-card" style="flex:1;min-width:280px">
-          <div class="form-title"><i class="fas fa-file-excel"></i> Bulk Issue via Excel</div>
-          <p style="font-size:0.83rem;color:var(--text-light);margin-bottom:1.25rem">Columns: Roll No, Student Name, Phone, Branch, Accession No, Issue Date, Return Date</p>
-          <div class="file-upload-area" onclick="document.getElementById('issue-excel-file').click()">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Click to choose file</p>
-            <p style="margin-top:0.3rem;font-size:0.75rem">.xlsx or .csv</p>
-            <input type="file" id="issue-excel-file" accept=".csv,.xlsx" onchange="handleIssueExcel(event)">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: WRITE-OFF -->
-    <div id="tab-write-off" class="admin-tab-content">
-      <div class="section-title"><i class="fas fa-trash-alt"></i> Write-Off Books</div>
-      <div class="action-row">
-        <div class="search-wrap" style="flex:1;margin:0">
-          <i class="fas fa-search"></i>
-          <input type="text" id="wo-search" placeholder="Search by book name, author…" oninput="renderWriteOffTable()">
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Acc No</th><th>Book Title</th><th>Author</th><th>Publisher</th><th>Qty</th><th>Price</th><th>Action</th>
-          </tr></thead>
-          <tbody id="wo-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: REGISTER STUDENT -->
-    <div id="tab-reg-student" class="admin-tab-content">
-      <div class="section-title"><i class="fas fa-user-plus"></i> Register New Student</div>
-      <div class="form-card">
-        <div class="form-title"><i class="fas fa-id-card"></i> Student Details</div>
-        <div class="form-grid">
-          <div class="form-group"><label>Roll No *</label><input type="text" id="rs-rollno" placeholder="e.g. 22CS01"></div>
-          <div class="form-group"><label>Full Name *</label><input type="text" id="rs-name" placeholder="Student Name"></div>
-          <div class="form-group"><label>Phone Number *</label><input type="tel" id="rs-phone" placeholder="10-digit number"></div>
-          <div class="form-group"><label>Branch</label><input type="text" id="rs-branch" placeholder="CS / EC / ME / CE"></div>
-          <div class="form-group"><label>Semester</label>
-            <select id="rs-sem">
-              <option value="">Select</option>
-              <option>1st</option><option>2nd</option><option>3rd</option>
-              <option>4th</option><option>5th</option><option>6th</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Email</label><input type="email" id="rs-email" placeholder="email@example.com"></div>
-        </div>
-        <div style="margin-top:1.25rem;display:flex;gap:0.75rem;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="clickSound();registerStudent()"><i class="fas fa-save"></i> Register Student</button>
-          <button class="btn btn-outline" onclick="clickSound();clearRegForm()"><i class="fas fa-redo"></i> Clear</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: ALL STUDENTS -->
-    <div id="tab-all-students" class="admin-tab-content">
-      <div class="section-title"><i class="fas fa-users"></i> All Registered Students</div>
-      <div class="action-row no-print">
-        <div class="search-wrap" style="flex:1;margin:0">
-          <i class="fas fa-search"></i>
-          <input type="text" id="students-search" placeholder="Search by name, roll no, branch…" oninput="renderStudentsTable()">
-        </div>
-        <button class="btn btn-dark no-print" onclick="clickSound();printStudents()"><i class="fas fa-print"></i> Print</button>
-      </div>
-      <div class="table-wrap">
-        <table id="students-table">
-          <thead><tr>
-            <th>#</th><th>Roll No</th><th>Name</th><th>Phone</th><th>Branch</th><th>Semester</th><th>Email</th><th class="no-print">Action</th>
-          </tr></thead>
-          <tbody id="students-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: ISSUED RECORDS -->
-    <div id="tab-issued-records" class="admin-tab-content">
-      <div class="section-title"><i class="fas fa-list-check"></i> Issued Book Records</div>
-      <div class="action-row no-print">
-        <div class="search-wrap" style="flex:1;margin:0">
-          <i class="fas fa-search"></i>
-          <input type="text" id="issued-search" placeholder="Search by student name, roll no, book title…" oninput="renderIssuedTable()">
-        </div>
-        <button class="btn btn-dark no-print" onclick="clickSound();printIssued()"><i class="fas fa-print"></i> Print</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>#</th><th>Roll No</th><th>Student Name</th><th>Phone</th><th>Branch</th><th>Book Title</th><th>Acc No</th><th>Issue Date</th><th>Return Date</th><th class="no-print">Action</th>
-          </tr></thead>
-          <tbody id="issued-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div><!-- /admin-dashboard -->
-</div><!-- /admin page -->
-
-<!-- =============================
-     MODALS
-     ============================= -->
-<div class="modal-overlay" id="book-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title"><i class="fas fa-book" style="color:var(--gold);margin-right:0.5rem"></i>Book Details</div>
-      <button class="modal-close" onclick="closeModal('book-modal')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="book-confirm-info">
-        <div class="book-cname" id="bm-title"></div>
-        <div style="font-size:0.8rem;color:var(--text-light);margin:0.3rem 0" id="bm-author"></div>
-        <div class="book-cprice" id="bm-price"></div>
-      </div>
-      <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1rem">Would you like to request this book? Please fill in your details:</p>
-      <div class="form-grid">
-        <div class="form-group"><label>Your Name *</label><input type="text" id="bm-uname" placeholder="Full Name"></div>
-        <div class="form-group"><label>Roll No *</label><input type="text" id="bm-rollno" placeholder="e.g. 22CS01"></div>
-        <div class="form-group"><label>Phone Number *</label><input type="tel" id="bm-phone" placeholder="10-digit"></div>
-        <div class="form-group"><label>Branch</label><input type="text" id="bm-branch" placeholder="CS / EC / ME"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('book-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="clickSound();confirmBookRequest()"><i class="fas fa-check"></i> Confirm Request</button>
-    </div>
-  </div>
-</div>
-
-<!-- Write-Off Confirm -->
-<div class="modal-overlay" id="writeoff-modal">
-  <div class="modal" style="max-width:380px">
-    <div class="modal-header">
-      <div class="modal-title" style="color:var(--danger)"><i class="fas fa-exclamation-triangle" style="margin-right:0.5rem"></i>Write-Off Book</div>
-      <button class="modal-close" onclick="closeModal('writeoff-modal')">×</button>
-    </div>
-    <div class="modal-body">
-      <p>Are you sure you want to write-off:</p>
-      <p style="font-weight:600;margin:0.75rem 0;color:var(--dark)" id="wo-book-name"></p>
-      <p style="font-size:0.82rem;color:var(--text-light)">This action cannot be undone.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('writeoff-modal')">Cancel</button>
-      <button class="btn btn-danger" onclick="clickSound();confirmWriteOff()"><i class="fas fa-trash"></i> Write-Off</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== FIREBASE SDK ===== -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, push, remove, update, child }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  // ── Firebase config from your project ──
-  const firebaseConfig = {
-    apiKey: "AIzaSyCf8NnLaHqG3gEy8q-dSQpENrwsMIMfqFk",
-    authDomain: "crp-library-939bf.firebaseapp.com",
-    databaseURL: "https://crp-library-939bf-default-rtdb.firebaseio.com",
-    projectId: "crp-library-939bf",
-    storageBucket: "crp-library-939bf.appspot.com",
-    messagingSenderId: "308133619242",
-    appId: "1:308133619242:web:75db4da93397542f240553",
-    measurementId: "G-8TZBNGB5FS"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-
-  // ── Expose to global scope ──
-  window._fb = { db, ref, set, get, onValue, push, remove, update, child };
-  window._fbReady = true;
-  window.dispatchEvent(new Event('fbReady'));
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-/* =====================================================
-   SEED DATA (1299 books – trimmed for brevity, full set injected on "Reload")
-   ===================================================== */
-const SEED_BOOKS = [{"accno":"6451","title":"HARYANA KA ITIHAS","author":"SHRI RAM SHARMA","publisher":"GEN.","price":5.0,"qty":1},{"accno":"6482","title":"STRUCTURE-I","author":"R SINGH","publisher":"GEN.","price":0,"qty":1},{"accno":"6578","title":"ELECT MACHINES II","author":"P C ARORA","publisher":"GEN.","price":15.0,"qty":1},{"accno":"6581","title":"ELECT MACHINES II","author":"P C ARORA","publisher":"GEN.","price":15.0,"qty":1},{"accno":"6582","title":"ELECT MACHINES II","author":"P C ARORA","publisher":"GEN.","price":15.0,"qty":1},{"accno":"6593","title":"ELECT DESIGN AND DRAWING","author":"G L MARWAH","publisher":"GEN.","price":14.9,"qty":1},{"accno":"6657","title":"UNTO THIS LAST","author":"D RAGHUKUL TILAK","publisher":"GEN.","price":9.0,"qty":1},{"accno":"6726","title":"ENGG MATHEMATICS-I","author":"VISHWANATH","publisher":"GEN.","price":25.0,"qty":1},{"accno":"6729","title":"MODERN PHYSICS","author":"P MEHENDRU","publisher":"GEN.","price":15.0,"qty":1},{"accno":"6825","title":"NUMERICAL PROBLEM IN PHYSICS","author":"C L CHAWLA","publisher":"GEN.","price":10.5,"qty":1},{"accno":"6853","title":"TB OF PROFESSIONAL STUDIES","author":"MEHTA , NAT","publisher":"GEN.","price":10.75,"qty":1},{"accno":"6879","title":"FUNDAMENTALS OF ELECT TECHNOLOGY","author":"V K MEHTA","publisher":"GEN.","price":16.5,"qty":1},{"accno":"6901","title":"ENGLISH PROSE SELCTION FOR POLYTECHNICS STUDENTS","author":"TTTI","publisher":"GEN.","price":3.5,"qty":1},{"accno":"7026","title":"LOGARITHMIC & OTHERS TABLES","author":"EXPERIENCE PROFESSORS","publisher":"GEN.","price":1.6,"qty":1},{"accno":"7039","title":"LOGARITHMIC & OTHERS TABLES","author":"R K HOODA","publisher":"GEN.","price":1.6,"qty":1},{"accno":"7107","title":"APPLIES MECHANICS & STRENGTH OF MATERIAL","author":"M S PARMAR","publisher":"GEN.","price":27.5,"qty":1},{"accno":"7210","title":"CONCRETE TECH.","author":"AGGARWAL","publisher":"GEN.","price":13.5,"qty":1},{"accno":"7274","title":"THE NEXT WORLD WAR","author":"WHELSN BUK","publisher":"GEN.","price":22.5,"qty":1},{"accno":"7287","title":"ALAKHPURA SE KOLKATTA","author":"PARTAP SINGH","publisher":"GEN.","price":5.25,"qty":1},{"accno":"7400","title":"CH CHHOTU RAM","author":"RAGHUVIR SHASTRI","publisher":"GEN.","price":10.0,"qty":1},{"accno":"7472","title":"STEEL TABLES","author":"KLV RAMU","publisher":"GEN.","price":1.25,"qty":1},{"accno":"7514","title":"MAHARAJA SURAJMAL","author":"K NATWAR SINGH","publisher":"GEN.","price":90.0,"qty":1},{"accno":"7516","title":"MAHARAJA SURAJMAL","author":"DR. BALBIR SINGH","publisher":"GEN.","price":70.0,"qty":1},{"accno":"7679","title":"ELECT. ENGG. MATERIALS","author":"K B RAINA","publisher":"GEN.","price":15.9,"qty":1},{"accno":"7683","title":"ELEMENTS OF ELECT ENGG.","author":"J B GUPTA","publisher":"GEN.","price":35.0,"qty":1},{"accno":"7875","title":"APPLIED PHYSICS I","author":"R K BANWAT","publisher":"GEN.","price":28.9,"qty":1},{"accno":"7903","title":"ENGG MATHEMATICS","author":"K K DHINGRA","publisher":"GEN.","price":29.9,"qty":1},{"accno":"8091","title":"APPLIED MECHANICS","author":"M S PARMAR","publisher":"GEN.","price":27.5,"qty":1},{"accno":"8193","title":"ADVANCED STRUCTURAL ANALYSIS","author":"P DAYARATNAM","publisher":"GEN.","price":45.0,"qty":1},{"accno":"8297","title":"RCC STRUCTURE","author":"GURCHARAN SINGH","publisher":"GEN.","price":60.0,"qty":1},{"accno":"8336","title":"ELECTRICAL INSTRUMENTS & MEASUREMENTS","author":"S K SEHDEV","publisher":"GEN.","price":17.9,"qty":1},{"accno":"8591","title":"APPLIED CHEMISTRY II","author":"D R SHARMA","publisher":"GEN.","price":32.9,"qty":1},{"accno":"8729","title":"PROFESSIONAL STUDIES","author":"V K MEHTA","publisher":"GEN.","price":17.9,"qty":1},{"accno":"9146","title":"ELECTRICAL MACHINES","author":"I J NAGRATH","publisher":"GEN.","price":69.0,"qty":1},{"accno":"9210","title":"PASCAL PROGRAMMING","author":"B J HOLMES","publisher":"GEN.","price":42.0,"qty":1},{"accno":"9221","title":"COMMUNICATION SYSTEMS","author":"SIMON HANKIN","publisher":"GEN.","price":65.0,"qty":1},{"accno":"9223","title":"AUTOMOBILE ENGG-I.","author":"R B GUPTA","publisher":"GEN.","price":70.0,"qty":1},{"accno":"9252","title":"SURVEY II","author":"C CL KOCHAR","publisher":"GEN.","price":30.0,"qty":1},{"accno":"9540","title":"ANCIENT VEDIC MATHEMATICS ANKUR","author":"DR NARENDERAPURI","publisher":"GEN.","price":100.0,"qty":1},{"accno":"9698","title":"GENERAL ENGLISH-11.","author":"R K CHATRATH","publisher":"GEN.","price":49.9,"qty":1},{"accno":"9768","title":"RAILWAY BRIDGES & TUNNELS","author":"T W SINGH","publisher":"GEN.","price":50.0,"qty":1},{"accno":"9838","title":"ELEMENTS OF HYDRAULICS","author":"D R MALHOTRA","publisher":"GEN.","price":45.0,"qty":1},{"accno":"9866","title":"THERMAL - II","author":"A S SARAO","publisher":"GEN.","price":45.0,"qty":1},{"accno":"9990","title":"ENGG DRAWING","author":"N S KUMAR","publisher":"GEN.","price":69.9,"qty":1},{"accno":"10318","title":"MODERN DIGITAL ELECTRONICS","author":"R P JAIN","publisher":"GEN.","price":81.0,"qty":1},{"accno":"10361","title":"INDUSTRIAL ENGG. & MGMT.","author":"O P KHANNA","publisher":"GEN.","price":135.0,"qty":1},{"accno":"10473","title":"MICROPROCESSORS & MICROCOMPUTERS","author":"B RAM","publisher":"GEN.","price":90.0,"qty":1},{"accno":"10641","title":"HIGHWAY MATERIAL TESTING","author":"S K KHANNA","publisher":"GEN.","price":45.0,"qty":1},{"accno":"10665","title":"APPLIED MECHANICS","author":"N L ARORA","publisher":"GEN.","price":59.9,"qty":1},{"accno":"10772","title":"CAD/CAM COMPUTER & AID","author":"M P GROVER","publisher":"GEN.","price":125.0,"qty":1},{"accno":"11060","title":"COMPUTERS","author":"V VERMA","publisher":"GEN.","price":0,"qty":1},{"accno":"11159","title":"APPLIED MATHEMATICS","author":"K R LAROIYA","publisher":"GEN.","price":0.0,"qty":1},{"accno":"11166","title":"ALGEBRA-I.","author":"N P BALI","publisher":"GEN.","price":0.0,"qty":1},{"accno":"11216","title":"DOS 6.2","author":"R MATHUR","publisher":"GEN.","price":75.0,"qty":1},{"accno":"11451","title":"FUNCTIONAL ELECTRONICS","author":"K V RAMANAN","publisher":"GEN.","price":185.0,"qty":1},{"accno":"11475","title":"COMPUTER PROG. FOR 77","author":"RAJA RAMAN","publisher":"GEN.","price":95.0,"qty":1},{"accno":"11476","title":"COMPUTER PROGRAMMING PASCAL","author":"V RAJARAMAN","publisher":"GEN.","price":110.0,"qty":1},{"accno":"11484","title":"ELECTRONIC COMMUNICATIONS","author":"JOHN COOLEN","publisher":"GEN.","price":150.0,"qty":1},{"accno":"11588","title":"OPTICAL FIBRE COMMUNICATION","author":"J M SENIOR","publisher":"GEN.","price":250.0,"qty":1},{"accno":"11602","title":"OP AMPS & LINEAR INTEGRATED CIRCUITS","author":"R A GAYAKWAD","publisher":"GEN.","price":175.0,"qty":1},{"accno":"11643","title":"SCHAUM'S OUTLINE SERIES","author":"B GOTTFRIED","publisher":"GEN.","price":150.0,"qty":1},{"accno":"11687","title":"NETWORKING AND FIELDS","author":"RYDER J D","publisher":"GEN.","price":125.0,"qty":1},{"accno":"11737","title":"PROFESSIONAL STUDIES","author":"V K MEHTA","publisher":"GEN.","price":49.9,"qty":1},{"accno":"11845","title":"STRUCTURE I","author":"BIRENDER SINGH","publisher":"GEN.","price":85.0,"qty":1},{"accno":"11972","title":"ANTENNA & WAVE PRO","author":"K D PARSAD","publisher":"GEN.","price":250.0,"qty":1},{"accno":"11997","title":"DIGITAL FUNDAMENTALS","author":"FLOYD","publisher":"GEN.","price":250.0,"qty":1},{"accno":"12233","title":"AUDIO AND VIDEO","author":"R G GUPTA","publisher":"GEN.","price":99.0,"qty":1},{"accno":"12325","title":"INTEGRATED CIRCUIT","author":"JA MILLMAN","publisher":"GEN.","price":230.0,"qty":1},{"accno":"12351","title":"BUSINESS CORROSPONDENCE","author":"R L SHARMA","publisher":"GEN.","price":115.0,"qty":1},{"accno":"12366","title":"PRINCIPLES OF COMMUNICATION SYSTEMS","author":"TAUB","publisher":"GEN.","price":210.0,"qty":1},{"accno":"12438","title":"HIGHWAY ENGG.","author":"N L ARORA","publisher":"GEN.","price":69.9,"qty":1},{"accno":"12472","title":"BRIDGE ENGG.","author":"N L ARORA","publisher":"GEN.","price":49.9,"qty":1},{"accno":"12484","title":"CIVIL ENGG. MATERIAL","author":"A AGGARWAL","publisher":"GEN.","price":72.9,"qty":1},{"accno":"12510","title":"CONCRETE TECHNOLOGY","author":"R K AGGARWAL","publisher":"GEN.","price":64.9,"qty":1},{"accno":"12513","title":"RAILWAY ENGG.","author":"N L ARORA","publisher":"GEN.","price":79.9,"qty":1},{"accno":"12532","title":"CIVIL ENGG DRAWING V-I.","author":"I S LAYAL","publisher":"GEN.","price":59.9,"qty":1},{"accno":"12661","title":"STRUCTURAL DESIGN","author":"K OHRI","publisher":"GEN.","price":79.9,"qty":1},{"accno":"12676","title":"APPLIED PHYSICS-I.","author":"B L ARORA","publisher":"GEN.","price":79.9,"qty":1},{"accno":"12803","title":"MONOCHROME & COLOUR TELEVISION","author":"R R GULATI","publisher":"GEN.","price":235.0,"qty":1},{"accno":"12861","title":"DESIGN OF CONCRETE","author":"RAJU KRISHNA","publisher":"GEN.","price":80.0,"qty":1},{"accno":"12987","title":"PHYSICS - I","author":"C L ARORA","publisher":"GEN.","price":250.0,"qty":1},{"accno":"13085","title":"ENVIROMENTAL PROBLEMS & SOLUTION","author":"D K ASTHANA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"13133","title":"GENERAL KNOWLEDGE","author":"K MOHAN","publisher":"GEN.","price":225.0,"qty":1},{"accno":"13228","title":"PRINCIPLES OF ELECT. ENGG. & ELEX.","author":"V K MEHTA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"13355","title":"T B OF ENGG. DRAWING","author":"S B MATHUR","publisher":"GEN.","price":195.0,"qty":1},{"accno":"13420","title":"BUILDING MATERIALS","author":"S K DUGGAL","publisher":"GEN.","price":125.0,"qty":1},{"accno":"13474","title":"ELECT POWER","author":"GUPTA","publisher":"GEN.","price":200.0,"qty":1},{"accno":"13539","title":"ELECT. MACHINES","author":"J B GUPTA","publisher":"GEN.","price":185.0,"qty":1},{"accno":"13670","title":"AUTOMOBILE ENGG-I.","author":"KIRPAL SINGH","publisher":"GEN.","price":85.0,"qty":1},{"accno":"13866","title":"WORKSHOP TECHNOLOGY V-I","author":"B S RAGHUWANSI","publisher":"GEN.","price":80.0,"qty":1},{"accno":"13875","title":"WORKSHOP TECHNOLOGY V-II","author":"B S RAGHUWANSI","publisher":"GEN.","price":90.0,"qty":1},{"accno":"13990","title":"THERMAL ENGG. S I UNIT","author":"DOMKUNDWAR","publisher":"GEN.","price":180.0,"qty":1},{"accno":"14132","title":"NON CONVENTIONAL MACH.","author":"P K MISHRA","publisher":"GEN.","price":95.0,"qty":1},{"accno":"14196","title":"ENGG DRAWING","author":"A C PARKINSON","publisher":"GEN.","price":95.0,"qty":1},{"accno":"14374","title":"ELECTRICAL MACHINES","author":"S K BHATTACHARYA","publisher":"GEN.","price":135.0,"qty":1},{"accno":"14451","title":"POWER SYSTEM ENGG","author":"I J NAGRATH","publisher":"GEN.","price":195.0,"qty":1},{"accno":"14457","title":"PPROGRAMMING IN ANSI C","author":"RAM KUMAR","publisher":"GEN.","price":150.0,"qty":1},{"accno":"14493","title":"ELECTRIC MACHINES","author":"I J NAGRATH","publisher":"GEN.","price":195.0,"qty":1},{"accno":"14817","title":"PRINCIPLES OF FOUNDRY TECH.","author":"P L JAIN","publisher":"GEN.","price":125.0,"qty":1},{"accno":"14858","title":"STRUCTURAL ENGG.","author":"P DAYARATNAM","publisher":"GEN.","price":185.0,"qty":1},{"accno":"15109","title":"DESIGN OF STEEL STRUCTURE","author":"L S NEGI","publisher":"GEN.","price":85.0,"qty":1},{"accno":"15329","title":"OPTICAL FIBRE COMMUNICATION","author":"J M SENIOR","publisher":"GEN.","price":250.0,"qty":1},{"accno":"15366","title":"UPGRADING & REPAIRING PCS","author":"S MUELLER","publisher":"GEN.","price":525.0,"qty":1},{"accno":"15493","title":"TB OF DES. OF RCC STRUCTURE","author":"GURUCHARAN SINGH","publisher":"GEN.","price":120.0,"qty":1},{"accno":"15574","title":"TECH. DRAWING WITH DESIGN","author":"YARWOOD Y","publisher":"GEN.","price":325.0,"qty":1},{"accno":"15658","title":"OSCILLATIONS & WAVES","author":"K R REDDY","publisher":"GEN.","price":140.0,"qty":1},{"accno":"15781","title":"BUILDING CONSTRUCTION","author":"JANARDAN JHA","publisher":"GEN.","price":55.0,"qty":1},{"accno":"15866","title":"ELECT. WIRING EST. & COSTING","author":"S L UPPAL","publisher":"GEN.","price":100.0,"qty":1},{"accno":"15895","title":"ELECTRONIC MEASUREMENT & INSTRUMENTATION","author":"R PARSAD","publisher":"GEN.","price":80.0,"qty":1},{"accno":"15925","title":"ENERGY TECH.","author":"S RAO","publisher":"GEN.","price":170.0,"qty":1},{"accno":"16342","title":"DATA STRUCTURE PASCAL","author":"R Y SHUKLA","publisher":"GEN.","price":120.0,"qty":1},{"accno":"16649","title":"ENGG. PHYSICS","author":"B L ARORA","publisher":"GEN.","price":99.9,"qty":1},{"accno":"16857","title":"ADVANCE EARNING DICTIONARY","author":"OXFORD","publisher":"GEN.","price":450.0,"qty":1},{"accno":"17059","title":"COMPUTER NETWORKS","author":"TANON BAUM A","publisher":"GEN.","price":195.0,"qty":1},{"accno":"17247","title":"ELECTRONIC COMMUNICATIONS","author":"KENNEDY","publisher":"GEN.","price":260.0,"qty":1},{"accno":"17255","title":"JAVA","author":"BALEGURH SAMY","publisher":"GEN.","price":170.0,"qty":1},{"accno":"17314","title":"DATA STRUCTURE WITH C+ & C++","author":"SOFAT S","publisher":"GEN.","price":195.0,"qty":1},{"accno":"17408","title":"UTILIZATION OF ELECT. ENGG.","author":"J B GUPTA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"17428","title":"MODERN TELEVISION PRACTICE","author":"R R GULATI","publisher":"GEN.","price":275.0,"qty":1},{"accno":"17606","title":"APP. MATH -1","author":"RAJIV KUMAR","publisher":"GEN.","price":125.0,"qty":1},{"accno":"17631","title":"FUNDAMANTAL OF PHYSICS","author":"NARULA IR","publisher":"GEN.","price":95.0,"qty":1},{"accno":"17693","title":"APP. MATH","author":"KHOKER D. S","publisher":"GEN.","price":128.0,"qty":1},{"accno":"17816","title":"FUNDAMENTAL PHYSICS","author":"PARDEEP D. S","publisher":"GEN.","price":378.0,"qty":1},{"accno":"18151","title":"RCC DESIGN","author":"BIRENDER SINGH","publisher":"GEN.","price":120.0,"qty":1},{"accno":"18295","title":"APP. MATH-II","author":"DHAMIJA A","publisher":"GEN.","price":150.0,"qty":1},{"accno":"18305","title":"APP. MECHANICS","author":"GARG MK","publisher":"GEN.","price":100.0,"qty":1},{"accno":"18353","title":"OPTICAL FIBER COMMUNICATION","author":"PURI S","publisher":"GEN.","price":75.0,"qty":1},{"accno":"18364","title":"MEDICAL ELECTRINICS","author":"GUPTA & SONI","publisher":"GEN.","price":90.0,"qty":1},{"accno":"18416","title":"ENVIRONMENTAL & POLLUTION AWERNESS","author":"SHARMA B R","publisher":"GEN.","price":45.0,"qty":1},{"accno":"18504","title":"APP. PHYSICS-II","author":"ARORA BL","publisher":"GEN.","price":120.0,"qty":1},{"accno":"18512","title":"APP MATH-II","author":"RAJIV KUMAR","publisher":"GEN.","price":140.0,"qty":1},{"accno":"18575","title":"PROGRAMMING IN C++","author":"SUSHI GOYAL","publisher":"GEN.","price":135.0,"qty":1},{"accno":"18590","title":"MULTIMEDIA APP.","author":"TEJINDER","publisher":"GEN.","price":125.0,"qty":1},{"accno":"18644","title":"MODERN ELECTRICALTRACTION","author":"PARTAB H","publisher":"GEN.","price":160.0,"qty":1},{"accno":"18677","title":"OBJECT ORIENTED C++","author":"LAFORE","publisher":"GEN.","price":337.0,"qty":1},{"accno":"18690","title":"RCC DESIGN SI UNIT","author":"BIRENDER SINGH","publisher":"GEN.","price":120.0,"qty":1},{"accno":"18709","title":"CONCRET TECHNOLOGY","author":"OHRI M L","publisher":"GEN.","price":89.9,"qty":1},{"accno":"18993","title":"UNIX SHELL PROGRAMMING","author":"Y KANITKAR","publisher":"GEN.","price":195.0,"qty":1},{"accno":"18995","title":"SQL, PL, SQL","author":"BAYRO S S I","publisher":"GEN.","price":360.0,"qty":1},{"accno":"19182","title":"ENGINEERING DRAWING","author":"KUMAR N S","publisher":"GEN.","price":150.0,"qty":1},{"accno":"19236","title":"ESTIMATING COSTING &VALUATION","author":"RANGAWALA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"19352","title":"CONSUMER ELECTRONICS","author":"YAGYIK","publisher":"GEN.","price":130.0,"qty":1},{"accno":"19370","title":"COMMUNICATION SKILL","author":"SHARMA A","publisher":"GEN.","price":100.0,"qty":1},{"accno":"19459","title":"OBJECT ORIENTED DPROGRAMMING","author":"BALAGURUSAMY E","publisher":"GEN.","price":210.0,"qty":1},{"accno":"19591","title":"INSPECTION & QUALITY CONTROL","author":"S BAJAJ","publisher":"GEN.","price":125.0,"qty":1},{"accno":"19843","title":"ELECT. & ELEX. MEASUREMENT","author":"A K SAWHNEY","publisher":"GEN.","price":400.0,"qty":1},{"accno":"19850","title":"SURVEYING-I","author":"B C PUNMIA","publisher":"GEN.","price":240.0,"qty":1},{"accno":"20045","title":"HANDBOOK OF PLASTIC","author":"SBP BOARD OF ENGG.","publisher":"GEN.","price":495.0,"qty":1},{"accno":"20049","title":"N X 4 FOR ENGINEERS & DESIGNERS","author":"SHAM TICKOO","publisher":"GEN.","price":499.0,"qty":1},{"accno":"20157","title":"ENGINEERING DRAWING","author":"KUMAR N S","publisher":"GEN.","price":160.0,"qty":1},{"accno":"20251","title":"HIGHWAY ENGG","author":"JAGROOP SINGH","publisher":"GEN.","price":138.0,"qty":1},{"accno":"20431","title":"S O MATERIALS","author":"BIRENDER SINGH","publisher":"GEN.","price":180.0,"qty":1},{"accno":"20583","title":"APP. MATH-I","author":"RAJIV KUMAR","publisher":"GEN.","price":140.0,"qty":1},{"accno":"20733","title":"COMPUTER ORGANISATION","author":"ISRD GROUP","publisher":"GEN.","price":185.0,"qty":1},{"accno":"20774","title":"COMPUTER NETWORKS","author":"TANENBAUM A S","publisher":"GEN.","price":310.0,"qty":1},{"accno":"21088","title":"FUND. ASP COMMUNICATION SKILLS","author":"PRASAD P","publisher":"GEN.","price":150.0,"qty":1},{"accno":"21119","title":"ELECT. MACHINES","author":"T SINGHU","publisher":"GEN.","price":110.0,"qty":1},{"accno":"21141","title":"ELECT. MEASUREMENT & MEASURING INSTRUMENT","author":"M L ANAND","publisher":"GEN.","price":120.0,"qty":1},{"accno":"21234","title":"BASIC OF INFORMATION TECHNOLOGY","author":"HARJINDER SINGH","publisher":"GEN.","price":150.0,"qty":1},{"accno":"21347","title":"DATA STRUCTURE","author":"A SAGAR","publisher":"GEN.","price":140.0,"qty":1},{"accno":"21377","title":"ADVANCE MICRO PROCESSOR","author":"MANJIT KAUR","publisher":"GEN.","price":100.0,"qty":1},{"accno":"21392","title":"IRRIGATION ENGINEERING","author":"OHRI","publisher":"GEN.","price":100.0,"qty":1},{"accno":"21413","title":"S.O.M","author":"CHATTER J","publisher":"GEN.","price":130.0,"qty":1},{"accno":"21478","title":"BUILDING CONSTRUCTION","author":"OHRI K","publisher":"GEN.","price":130.0,"qty":1},{"accno":"21531","title":"CIVIL ENGG DRAWING","author":"N S KUMAR","publisher":"GEN.","price":100.0,"qty":1},{"accno":"21598","title":"WATER SUPPLY & WASTE WATER ENGG","author":"M L OHRI","publisher":"GEN.","price":125.0,"qty":1},{"accno":"21634","title":"CONCRETE TECHNOLOGY","author":"AGGARWAL R K","publisher":"GEN.","price":100.0,"qty":1},{"accno":"21643","title":"DIGITAL ELECTRONICS","author":"J C KARHARA","publisher":"GEN.","price":85.0,"qty":1},{"accno":"21662","title":"APP. MECHANICS","author":"ARORA N L","publisher":"GEN.","price":130.0,"qty":1},{"accno":"21694","title":"SOFTWARE ENGG","author":"TEJENDER SINGH","publisher":"GEN.","price":90.0,"qty":1},{"accno":"21755","title":"APP MATH I","author":"RAJIV","publisher":"GEN.","price":160.0,"qty":1},{"accno":"21793","title":"APP CHEMISTRY-I","author":"KHATRI A.S","publisher":"GEN.","price":110.0,"qty":1},{"accno":"21825","title":"APP CHEMISTRY-II","author":"KHATRI A.S","publisher":"GEN.","price":130.0,"qty":1},{"accno":"21873","title":"APP PHYSICS","author":"ARORA B L","publisher":"GEN.","price":130.0,"qty":1},{"accno":"21998","title":"POWER ELEX","author":"J C KARHARA","publisher":"GEN.","price":130.0,"qty":1},{"accno":"22098","title":"BASIC & APP. SOIL MECHANICS","author":"GOPAL RANJAN","publisher":"GEN.","price":275.0,"qty":1},{"accno":"22174","title":"JAWA J2SE","author":"H SCHILDT","publisher":"GEN.","price":465.0,"qty":1},{"accno":"22247","title":"APPLIED CHEMISTRY-1","author":"A S KHATRI","publisher":"GEN.","price":110.0,"qty":1},{"accno":"22277","title":"APPLIED CHEMISTRY-11","author":"A S KHATRI","publisher":"GEN.","price":130.0,"qty":1},{"accno":"22377","title":"APP. MATH-I","author":"RAJIV KUMAR","publisher":"GEN.","price":160.0,"qty":1},{"accno":"22410","title":"APPLIED MATH-2ND","author":"RAJIV KUMAR","publisher":"GEN.","price":150.0,"qty":1},{"accno":"22426","title":"ENGG DRAWING","author":"N S KUMAR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"22449","title":"COMMUNICATION ENGG-2ND","author":"GURVINDER PAL","publisher":"GEN.","price":100.0,"qty":1},{"accno":"22496","title":"COMMUNICATION ENGG-1ST","author":"VIKRANT SHARMA","publisher":"GEN.","price":70.0,"qty":1},{"accno":"22509","title":"COMMUNICATING EFFECTIVELY IN ENGHLISH-1ST","author":"SHARDA KAUSHIK","publisher":"GEN.","price":125.0,"qty":1},{"accno":"22670","title":"HYDRAULICS & FLUID MECHANICS","author":"P N MODI","publisher":"GEN.","price":480.0,"qty":1},{"accno":"23088","title":"OPERATING SYSTEM","author":"D M DHAMDHERE","publisher":"GEN.","price":395.0,"qty":1},{"accno":"23127","title":"ELECT DESIGN & DRAWING","author":"S SINGH","publisher":"GEN.","price":200.0,"qty":1},{"accno":"23263","title":"BRIDGE ENGG.","author":"PONNUSWAMY","publisher":"GEN.","price":795.0,"qty":1},{"accno":"23308","title":"ELECT ESTIMATING & COSTING","author":"S SINGH","publisher":"GEN.","price":240.0,"qty":1},{"accno":"23542","title":"A T B OF ELECT. TECHNOLOGY","author":"B L THAREJA","publisher":"GEN.","price":410.0,"qty":1},{"accno":"23634","title":"MODERN DIGITAL ELEX","author":"R P JAIN","publisher":"GEN.","price":350.0,"qty":1},{"accno":"23743","title":"OBJECT ORIENTED PROGRAMMING WITH C++","author":"ABHISHEK SAGAR","publisher":"GEN.","price":150.0,"qty":1},{"accno":"23788","title":"CONCRETE TECHNOLOGY","author":"BIRENDER SINGH","publisher":"GEN.","price":170.0,"qty":1},{"accno":"23817","title":"WORKSHOP TECH. I","author":"V K MANCHANDA","publisher":"GEN.","price":160.0,"qty":1},{"accno":"24034","title":"RDBMS","author":"TEJINDER SINGH","publisher":"GEN.","price":140.0,"qty":1},{"accno":"24115","title":"A TB OF STRUCTURAL MECHANICS","author":"ABHIJIT CHATTERJEE","publisher":"GEN.","price":150.0,"qty":1},{"accno":"24128","title":"A TB OF RAILWAYS,BRIDGES&TUNNELS","author":"N L ARORA","publisher":"GEN.","price":160.0,"qty":1},{"accno":"24138","title":"HIGHWAY ENGG","author":"N L ARORA","publisher":"GEN.","price":130.0,"qty":1},{"accno":"24146","title":"A TB OF SURVEYING & LEVELLING-1.","author":"AMARJIT AGGARWAL","publisher":"GEN.","price":140.0,"qty":1},{"accno":"24179","title":"APPLIED MECHANICS","author":"N L ARORA","publisher":"GEN.","price":185.0,"qty":1},{"accno":"24235","title":"THERMODYNAMICS","author":"S S THETHI","publisher":"GEN.","price":160.0,"qty":1},{"accno":"24285","title":"ENGG DRAWING","author":"N S KUMAR","publisher":"GEN.","price":260.0,"qty":1},{"accno":"24395","title":"APPLIED MATH-1.","author":"RAJIV KUMAR","publisher":"GEN.","price":200.0,"qty":1},{"accno":"24543","title":"APP. MATH-II","author":"RAJIV KUMAR","publisher":"GEN.","price":240.0,"qty":1},{"accno":"24599","title":"APPLIED CHEMISTRY-1.","author":"A S KHATRI","publisher":"GEN.","price":125.0,"qty":1},{"accno":"24698","title":"APPLIED CHEMISTRY-11.","author":"A S KHATRI","publisher":"GEN.","price":170.0,"qty":1},{"accno":"24803","title":"APPLIED PHYSICS-1.","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"24866","title":"DATA COMMUNICATION","author":"TEJINDER SINGH","publisher":"GEN.","price":120.0,"qty":1},{"accno":"24875","title":"COMPUTER WORKSHOP","author":"JASBIR SINGH","publisher":"GEN.","price":130.0,"qty":1},{"accno":"24928","title":"COMPUTER PERIPHERAL & INTERFACING","author":"AMANDEEP NAGPAL","publisher":"GEN.","price":125.0,"qty":1},{"accno":"24943","title":"POWER ELEX","author":"J C KARHARA","publisher":"GEN.","price":180.0,"qty":1},{"accno":"24955","title":"BASIC ELECT. ENGG.","author":"M S KARHARA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"24980","title":"WATER SUPPLY & WASTE WATER ENGG","author":"M L OHRI","publisher":"GEN.","price":190.0,"qty":1},{"accno":"25005","title":"SOIL & FOUNDATION ENGG","author":"M L OHRI","publisher":"GEN.","price":160.0,"qty":1},{"accno":"25014","title":"ELEX. DEVIVICES & CIRCUITS","author":"J C KARHARA","publisher":"GEN.","price":140.0,"qty":1},{"accno":"25160","title":"INSTRUMENTATION","author":"SAPRA & CHADHA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"25180","title":"MULTI MEDIA APPLICATION","author":"A CHOPRA & P GUPTA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"25265","title":"COMMUNICATING EFFECTIVELY IN ENGLISH-1.","author":"DR SHAHNAZ","publisher":"GEN.","price":170.0,"qty":1},{"accno":"25321","title":"APPLIED PHYSICS-1.","author":"T R NARULA","publisher":"GEN.","price":160.0,"qty":1},{"accno":"25334","title":"APPLIED CHEMISTRY-1.","author":"SUNITA RANI & OTHERS","publisher":"GEN.","price":150.0,"qty":1},{"accno":"25361","title":"APP. CHEM II","author":"JAGMOHAN OBEROI","publisher":"GEN.","price":190.0,"qty":1},{"accno":"25404","title":"COMMUNICATING EFFECTIVELY IN ENGLISH-11.","author":"DR SHAHNAZ","publisher":"GEN.","price":190.0,"qty":1},{"accno":"25467","title":"APPLIED PHYSICS-11.","author":"B L ARORA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"25719","title":"SUREYING -1.","author":"B C PUNMIA","publisher":"GEN.","price":350.0,"qty":1},{"accno":"25825","title":"APPLIED MATHEMATICS-11.","author":"RAJIV KUMAR","publisher":"GEN.","price":240.0,"qty":1},{"accno":"25924","title":"APPLIED CHEMISTRY-11.","author":"A S KHATRI","publisher":"GEN.","price":170.0,"qty":1},{"accno":"25959","title":"ENGG DRAWING","author":"N S KUMAR","publisher":"GEN.","price":280.0,"qty":1},{"accno":"26055","title":"CIVIL ENGG DRAWING-1. (BUILDING DRAWING)","author":"N S KUMAR & LAYAL","publisher":"GEN.","price":130.0,"qty":1},{"accno":"26075","title":"CIVIL ENGG DRAWING-2","author":"N S KUMAR","publisher":"GEN.","price":100.0,"qty":1},{"accno":"26144","title":"ELECT ENGG DESIGN & DRAWING-11.","author":"J C KARHARA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"26174","title":"A TB OF MODERN ELECTRIC TRACTION SYSTEM","author":"GEETIKA GOYAL","publisher":"GEN.","price":100.0,"qty":1},{"accno":"26206","title":"ELECT &ELEX ENGG MATERIALS","author":"M L ANAND","publisher":"GEN.","price":140.0,"qty":1},{"accno":"26269","title":"E D M","author":"IKJOT SINGH","publisher":"GEN.","price":170.0,"qty":1},{"accno":"26452","title":"S O M","author":"ABHIJIT CHATTERJEE","publisher":"GEN.","price":170.0,"qty":1},{"accno":"26479","title":"INDUSTRIAL ENGG","author":"R K ANAND","publisher":"GEN.","price":150.0,"qty":1},{"accno":"26561","title":"APPLIED MATHEMATICS-11.","author":"D S KHOKAR","publisher":"GEN.","price":238.0,"qty":1},{"accno":"26622","title":"FLUID MECHANICS","author":"G S AULAKH","publisher":"GEN.","price":168.0,"qty":1},{"accno":"26656","title":"ANALOG ELEX-1.","author":"JAYTEESH MALHOTRA","publisher":"GEN.","price":128.0,"qty":1},{"accno":"26673","title":"ANALOG ELEX-11.","author":"RAJESH KUMAR","publisher":"GEN.","price":138.0,"qty":1},{"accno":"26709","title":"THERMODYNAMICS-1.","author":"G S AULAKH","publisher":"GEN.","price":168.0,"qty":1},{"accno":"26710","title":"GENERAL ENGG","author":"G L MARWAHA","publisher":"GEN.","price":108.0,"qty":1},{"accno":"26855","title":"APP. PHY. II","author":"T R NARULA","publisher":"GEN.","price":200.0,"qty":1},{"accno":"26919","title":"APPLIED CHEMISTRY-11.","author":"JAGMOHAN OBEROI","publisher":"GEN.","price":200.0,"qty":1},{"accno":"26938","title":"COMMUNICATING EFF. IN ENGLISH -II","author":"DR SHAHNAZ","publisher":"GEN.","price":200.0,"qty":1},{"accno":"27026","title":"FLUID MECHANICS","author":"M K GARG","publisher":"GEN.","price":175.0,"qty":1},{"accno":"27095","title":"INSTALLATION, MAINTANANCE & TROUBLESHOOTING OF EQUIPMENTS","author":"PRITI SRIVASTAVA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"27180","title":"ELECT ENGG DESIGN & DRAWING-11.","author":"SURJIT SINGH","publisher":"GEN.","price":160.0,"qty":1},{"accno":"27244","title":"MATERIAL & METALLURGY","author":"SANDEEP BAJAJ","publisher":"GEN.","price":200.0,"qty":1},{"accno":"27250","title":"INSPECTION & QUALITY CONTROL","author":"SANDEEP BAJAJ","publisher":"GEN.","price":190.0,"qty":1},{"accno":"27303","title":"WEB DESIGNING","author":"ASHISH CHOPRA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"27311","title":"ELECT MACHINES-11.","author":"G L MARWAHA","publisher":"GEN.","price":178.0,"qty":1},{"accno":"27522","title":"APPLIED MATHEMATICS-1.","author":"D S KHOKHER","publisher":"GEN.","price":188.0,"qty":1},{"accno":"27543","title":"APPLIED PHYSICS-1.","author":"R A BANWAT","publisher":"GEN.","price":178.0,"qty":1},{"accno":"27567","title":"OBJECT ORIENTED PROGRAMMING USING C++","author":"VIPIN ARORA","publisher":"GEN.","price":168.0,"qty":1},{"accno":"27575","title":"RELATIONAL DATA BASE MANAGEMENT SYSTEM","author":"VIPIN ARORA","publisher":"GEN.","price":178.0,"qty":1},{"accno":"27612","title":"ENTREPRENEURSHIP DEVELOPMENT & MANAGEMENT","author":"BAJAJ & CHAWLA","publisher":"GEN.","price":180.0,"qty":1},{"accno":"27726","title":"NETWORK SECURITY","author":"PRITI SRIVASTAVA","publisher":"GEN.","price":200.0,"qty":1},{"accno":"27767","title":"COMMUNICATING EFFECTIVELY IN ENGLISH-1.","author":"DR. SHAHNAZ","publisher":"GEN.","price":190.0,"qty":1},{"accno":"27912","title":"APPLIED PHYSICS-1.","author":"T R NARULA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"27995","title":"APPLIED CHEMISTRY-1.","author":"DR SUNITA RANI & OTHERS","publisher":"GEN.","price":175.0,"qty":1},{"accno":"28065","title":"MATERIAL & METALLURGY","author":"SANDEEP BAJAJ","publisher":"GEN.","price":200.0,"qty":1},{"accno":"28088","title":"TENDERING & VALUATION","author":"ASHEET BAJAJ , KATARIA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"28189","title":"APPLIED MATHEMATICS-1.","author":"RAJIV KUMAR","publisher":"GEN.","price":240.0,"qty":1},{"accno":"28299","title":"APPLIED PHYSICS-1.","author":"B L ARORA","publisher":"GEN.","price":180.0,"qty":1},{"accno":"28394","title":"APPLIED CHEMISTRY-1.","author":"A S KHATRI","publisher":"GEN.","price":140.0,"qty":1},{"accno":"28572","title":"APPLIED CHEMISTRY-1.","author":"G S KUMAR , S S KUMAR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"28663","title":"APPLIED MATHEMATICS-1.","author":"RAJIV KR , V.GOTAN","publisher":"GEN.","price":170.0,"qty":1},{"accno":"28682","title":"APPLIED MATHEMATICS-11.","author":"DR NEERAJ PANT","publisher":"GEN.","price":170.0,"qty":1},{"accno":"28723","title":"APPLIED PHYSICS-1.","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"28797","title":"APPLIED PHYSICS-11.","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"28884","title":"BASIC OF INFORMATION TECHNOLOGY","author":"PROF.S S ARORA & OTHERS","publisher":"GEN.","price":220.0,"qty":1},{"accno":"28914","title":"DIGITAL ELEX & MICROPROCESSORS","author":"M S KARHARA","publisher":"GEN.","price":220.0,"qty":1},{"accno":"28986","title":"BASIC ELEX ANALOG","author":"J C KARHARA","publisher":"GEN.","price":160.0,"qty":1},{"accno":"29010","title":"INDUSTRIAL ENGG","author":"ER. R K ANAND","publisher":"GEN.","price":150.0,"qty":1},{"accno":"29029","title":"HIGHWAY ENGG","author":"N L ARORA & SUPPLE","publisher":"GEN.","price":150.0,"qty":1},{"accno":"29057","title":"WORKSHOP TECHNOLOGY-1.","author":"V K MANCHANDA","publisher":"GEN.","price":200.0,"qty":1},{"accno":"29134","title":"BUILDING CONSTRUCTION","author":"KAPIL OHRI","publisher":"GEN.","price":170.0,"qty":1},{"accno":"29187","title":"INSTALLATION , TESTING & MAINTENANCE","author":"ER R K ANAND","publisher":"GEN.","price":200.0,"qty":1},{"accno":"29202","title":"CONSTRUCTION MANAGEMENT & ACCOUNTS","author":"M L OHRI","publisher":"GEN.","price":200.0,"qty":1},{"accno":"29211","title":"APPLIED MECHANICS","author":"N L ARORA & OTHERS","publisher":"GEN.","price":200.0,"qty":1},{"accno":"29322","title":"ELECTRICAL POWER-11.","author":"S K SAHDEV","publisher":"GEN.","price":50.0,"qty":1},{"accno":"29387","title":"UTILIZATION OF ELECTRICAL ENGG","author":"S K SAHDEV , UBHI","publisher":"GEN.","price":80.0,"qty":1},{"accno":"29399","title":"ELECTRICAL INSTRUMENTS & MEASUREMENTS","author":"S K SAHDEV , UBHI","publisher":"GEN.","price":80.0,"qty":1},{"accno":"29457","title":"ELECTRICAL POWER-1.","author":"S K SAHDEV","publisher":"GEN.","price":120.0,"qty":1},{"accno":"29478","title":"APP PHYSICS -I","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"29529","title":"ENGG DRAWING I","author":"N S KUMAR","publisher":"GEN.","price":200.0,"qty":1},{"accno":"29645","title":"WORKSHOP TECHNOLOGY I","author":"V K MANCHANDA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"29684","title":"APP. MATH-I","author":"RAJIV KUMAR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"29710","title":"ANALOG ELECTRONICS-II","author":"J C KARHARA","publisher":"GEN.","price":180.0,"qty":1},{"accno":"29738","title":"COMMUNIATION SKILLS -I","author":"J S MALIK","publisher":"GEN.","price":140.0,"qty":1},{"accno":"29778","title":"APP. MATH-I","author":"MAHAVEER SINGH","publisher":"GEN.","price":200.0,"qty":1},{"accno":"29800","title":"OPERATING SYSTEM CONCEPTS 8th","author":"A SILBERSCFATZ","publisher":"GEN.","price":599.0,"qty":1},{"accno":"29805","title":"APP. CHEMISTRY -I","author":"RAVI SAINI","publisher":"GEN.","price":150.0,"qty":1},{"accno":"29841","title":"NETWORK FILTER & TRANSMISSION LINE","author":"PARVINDER BANGAR","publisher":"GEN.","price":250.0,"qty":1},{"accno":"29864","title":"ELECT. MEASUREMENT & MEASURING INSTRUMENT","author":"VIKRAM CHAHAL","publisher":"GEN.","price":175.0,"qty":1},{"accno":"29867","title":"S O M","author":"TARUN GUPTA","publisher":"GEN.","price":220.0,"qty":1},{"accno":"29926","title":"DIGITAL ELECTRONICS -I","author":"DR K P MISHRA","publisher":"GEN.","price":180.0,"qty":1},{"accno":"29947","title":"IS 800 WITH AMEND 1 2007","author":"BUREAU OF INDIA STANDARDS","publisher":"GEN.","price":1800.0,"qty":1},{"accno":"29969","title":"APP. PHYSICS-I","author":"ANOOP S YADAV","publisher":"GEN.","price":120.0,"qty":1},{"accno":"30065","title":"EMPLOYABILITY SKILLS-I","author":"MARINDER KAUR","publisher":"GEN.","price":58.0,"qty":1},{"accno":"30122","title":"COMMUNICATION SKILL-I","author":"MARINDER KAUR","publisher":"GEN.","price":158.0,"qty":1},{"accno":"30135","title":"APP. MATH - I","author":"S S SABHARWAL","publisher":"GEN.","price":228.0,"qty":1},{"accno":"30177","title":"ENVIRONMENTAL EDUCATION","author":"DR DEEPAK ARORA","publisher":"GEN.","price":158.0,"qty":1},{"accno":"30241","title":"ELECT. MEASUREMENT & MEASURING INSTRUMENT","author":"G L MARWAHA","publisher":"GEN.","price":168.0,"qty":1},{"accno":"30266","title":"ELECTRICAL MACHINE -I","author":"G L MARWAHA","publisher":"GEN.","price":198.0,"qty":1},{"accno":"30324","title":"APP. PHYSICS-I","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"30361","title":"APP. PHYSICS-II","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"30411","title":"APP. MATH-I","author":"RAJIV KUMAR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"30461","title":"APP. MATH-II","author":"DR. NEERAJ PANT","publisher":"GEN.","price":170.0,"qty":1},{"accno":"30519","title":"COMMUNICATION SKILLS-I","author":"DR RAJESH KAPOOR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"30576","title":"COMMUNICATION SKILLS-II","author":"DR RAJESH KAPOOR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"30630","title":"RAILWAY BRIDGES & TUNNELS","author":"N L ARORA & OTHERS","publisher":"GEN.","price":180.0,"qty":1},{"accno":"30683","title":"ELECT. MACHINES-I","author":"G L MARWAHA","publisher":"GEN.","price":198.0,"qty":1},{"accno":"30750","title":"R C C DESIGN","author":"RAJIV BHATIA","publisher":"GEN.","price":318.0,"qty":1},{"accno":"30765","title":"INDUSTRIAL ENGG","author":"GAURAV SHARMA","publisher":"GEN.","price":158.0,"qty":1},{"accno":"30905","title":"NON CONVENTIONAL ENERGY RESOURCES","author":"DR R K SINGAL","publisher":"GEN.","price":175.0,"qty":1},{"accno":"31061","title":"EMPLOYABILITY SKILLS-II","author":"GARG & GUPTA","publisher":"GEN.","price":75.0,"qty":1},{"accno":"31084","title":"WIRELESS & MOBILE COMMUNICATION","author":"V K SANGAR","publisher":"GEN.","price":175.0,"qty":1},{"accno":"31135","title":"DIGITAL ELECTRONICS -II","author":"GANGHAS & GIRDHAR","publisher":"GEN.","price":190.0,"qty":1},{"accno":"31149","title":"INSTRUMENTATION","author":"SAPRA & CHADHA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"31215","title":"THERMODYNAMICS","author":"G S AULAKH","publisher":"GEN.","price":198.0,"qty":1},{"accno":"31261","title":"R A C","author":"G S AULAKH","publisher":"GEN.","price":188.0,"qty":1},{"accno":"31293","title":"ENERGY MANAGEMENT","author":"SHAMINDER SINGH","publisher":"GEN.","price":88.0,"qty":1},{"accno":"31306","title":"ELECTRICAL & ELECTRONICS ENGINEERING MATERIAL","author":"G L MARWAHA","publisher":"GEN.","price":148.0,"qty":1},{"accno":"31350","title":"ELECTRICAL MACHINE -I","author":"G L MARWAHA","publisher":"GEN.","price":198.0,"qty":1},{"accno":"31381","title":"ELECTRICAL MACHINE -II","author":"G L MARWAHA","publisher":"GEN.","price":168.0,"qty":1},{"accno":"31434","title":"ELECT. MEASUREMENT & MEASURING INSTRUMENT","author":"G L MARWAHA","publisher":"GEN.","price":168.0,"qty":1},{"accno":"31445","title":"UTILIZATION OF ELECTRICAL ENERGY","author":"G L MARWAHA","publisher":"GEN.","price":168.0,"qty":1},{"accno":"31542","title":"ENVIROMENTAL EDU.","author":"DR DEEPAK ARORA","publisher":"GEN.","price":158.0,"qty":1},{"accno":"31562","title":"APP. CHEMISTRY -I","author":"JAGMOHAN OBERAI","publisher":"GEN.","price":150.0,"qty":1},{"accno":"31614","title":"APP CHEMISTRY -II","author":"OBERIA & SETHI","publisher":"GEN.","price":175.0,"qty":1},{"accno":"31695","title":"COMMUNICATION SKILLS IN ENG - I","author":"DR SHAHNAZ","publisher":"GEN.","price":200.0,"qty":1},{"accno":"31739","title":"COMMUNICATION SKILLS -II","author":"DR SHAHNAZ","publisher":"GEN.","price":175.0,"qty":1},{"accno":"31855","title":"EMPLOYABILITY SKILLS-II","author":"GARG & GUPTA","publisher":"GEN.","price":75.0,"qty":1},{"accno":"31916","title":"T O M","author":"BHARAT BHUSHAN","publisher":"GEN.","price":200.0,"qty":1},{"accno":"31994","title":"INSTRUMENTATION","author":"SAPRA & CHADHA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32067","title":"FLUID MECHANICS","author":"M K GARG","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32081","title":"BUILDING CONSTRUCTION","author":"BAJAJ & KATARIA","publisher":"GEN.","price":225.0,"qty":1},{"accno":"32096","title":"SURVEYING -I","author":"G S BHATIA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"32127","title":"CIVIL ENGG. DRG.-I","author":"ASHIT BAJAJ, KATARIA","publisher":"GEN.","price":180.0,"qty":1},{"accno":"32137","title":"S O M","author":"M K GARG BAJAJ","publisher":"GEN.","price":200.0,"qty":1},{"accno":"32182","title":"W/S TECHNOLOGY-I","author":"RP DHIMAN , BAJAJ","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32204","title":"MACHINE DRAWING","author":"V GAMBHIR, DHIMAN","publisher":"GEN.","price":150.0,"qty":1},{"accno":"32240","title":"HYDRAULICS & HYDRAULICS MACHINES","author":"M K GARG , DHIMAN","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32268","title":"W/S TECHNOLOGY-II","author":"R P DHIMAN , BAJAJ","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32330","title":"MACHINE DESIGN & DRAWING","author":"PANKAJ BHALLA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32359","title":"I C ENGINES","author":"SANDEEP BAJAJ, KAJAL","publisher":"GEN.","price":200.0,"qty":1},{"accno":"32452","title":"W/S TECHNOLOGY -III","author":"R P DHIMAN ,S BAJAJ","publisher":"GEN.","price":175.0,"qty":1},{"accno":"32473","title":"AUTOMOBILE ENGG","author":"VIJAY S KHILARY","publisher":"GEN.","price":200.0,"qty":1},{"accno":"32516","title":"INDUSTRIAL ENGG","author":"DR S S DAHIYA INDUSTRIAL ENGG","publisher":"GEN.","price":175.0,"qty":1},{"accno":"32519","title":"EDM","author":"BAJAJ & CHAWLA","publisher":"GEN.","price":180.0,"qty":1},{"accno":"32619","title":"STRUCTURAL MACHINES","author":"GARG &BAJAJ","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32658","title":"CONCRETE TECHNOLOGY","author":"BAJAJ & KATARIA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"32708","title":"INSPECTION & QUALITY CONTROL","author":"SANDEEP BAJAJ","publisher":"GEN.","price":200.0,"qty":1},{"accno":"32765","title":"ENGG. DRAWING-I","author":"N S KUMAR","publisher":"GEN.","price":200.0,"qty":1},{"accno":"32784","title":"ENGG. DRAWING-II","author":"N S KUMAR","publisher":"GEN.","price":150.0,"qty":1},{"accno":"32865","title":"APP. PHYSICS-I","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"32937","title":"APP. PHYSICS-II","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"32949","title":"APP. MATH-I","author":"RAJIV KUMAR","publisher":"GEN.","price":200.0,"qty":1},{"accno":"33014","title":"APP. MATH-II","author":"DR. NEERAJ PANT","publisher":"GEN.","price":170.0,"qty":1},{"accno":"33121","title":"DIGITAL ELECTRINICS & MICRO PROCESSORS","author":"ER. M S KARHARA","publisher":"GEN.","price":220.0,"qty":1},{"accno":"33135","title":"ENVIRONMENTAL EDUCATION","author":"M K GARG","publisher":"GEN.","price":100.0,"qty":1},{"accno":"33195","title":"CONSUMER ELECTRONICS","author":"DR Y YAGYIK, JAIN","publisher":"GEN.","price":250.0,"qty":1},{"accno":"33200","title":"COMP. PERIPHERALS &INTERFACING","author":"PRITI SRIVASTAVA","publisher":"GEN.","price":200.0,"qty":1},{"accno":"33248","title":"COMPUTER NETWORKS","author":"PRITI SRIVASTAVA","publisher":"GEN.","price":175.0,"qty":1},{"accno":"33278","title":"RDBMS","author":"PRITI SRIVASTAVA","publisher":"GEN.","price":190.0,"qty":1},{"accno":"33326","title":"SOFTWARE ENGG","author":"SANDEEP KUMAR","publisher":"GEN.","price":150.0,"qty":1},{"accno":"33343","title":"COMP. PROGRAMMING & APPLICATIONS","author":"PRITI SRIVASTAVA","publisher":"GEN.","price":220.0,"qty":1},{"accno":"33356","title":"APP. CHEMISTRY -I","author":"JAGMOHAN OBEROI","publisher":"GEN.","price":150.0,"qty":1},{"accno":"33504","title":"MICROWAVE & RADAR ENGG.","author":"JAYSHRI JOSHI, KULKARNI","publisher":"GEN.","price":100.0,"qty":1},{"accno":"33547","title":"ANALOG ELECTRONICS-II","author":"J S KATRE","publisher":"GEN.","price":125.0,"qty":1},{"accno":"33564","title":"POWER ELEX.","author":"J S KATRE","publisher":"GEN.","price":125.0,"qty":1},{"accno":"33600","title":"DIGITAL ELEX-I","author":"J S KATRE","publisher":"GEN.","price":150.0,"qty":1},{"accno":"33632","title":"APP. MATH-I","author":"S S SABHARWAL","publisher":"GEN.","price":228.0,"qty":1},{"accno":"33702","title":"APP. MATH-II","author":"S S SABHARWAL , JAIN","publisher":"GEN.","price":218.0,"qty":1},{"accno":"33756","title":"STEEL STRUCTURES","author":"RAJEEV BHATIA","publisher":"GEN.","price":298.0,"qty":1},{"accno":"33763","title":"ELECTRICAL POWER -I","author":"G L MARWAHA","publisher":"GEN.","price":228.0,"qty":1},{"accno":"33795","title":"ANALOG ELECTRONICS -II","author":"JYOTEESH MALHOTRA","publisher":"GEN.","price":168.0,"qty":1},{"accno":"33869","title":"STRUCTURAL DRAWING","author":"RAJEEV BHATIA","publisher":"GEN.","price":218.0,"qty":1},{"accno":"33887","title":"ENVIRONMENTAL EDUCATION","author":"DR. DEEPAK ARORA","publisher":"GEN.","price":158.0,"qty":1},{"accno":"33935","title":"ENGG DRAWING-I","author":"N S KUMAR","publisher":"GEN.","price":200.0,"qty":1},{"accno":"33968","title":"ENGG DRAWING-II","author":"N S KUMAR","publisher":"GEN.","price":150.0,"qty":1},{"accno":"34027","title":"APP. PHYSICS-I","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"34071","title":"APP. PHYSICS-II","author":"B L ARORA","publisher":"GEN.","price":150.0,"qty":1},{"accno":"34118","title":"APP. MATH-I","author":"RAJIV KUMAR","publisher":"GEN.","price":200.0,"qty":1},{"accno":"34179","title":"APP. MATH-II","author":"RAJIV KUMAR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"34211","title":"COMMUNICATION SKILLS-II","author":"DR RAJESH KAPOOR","publisher":"GEN.","price":170.0,"qty":1},{"accno":"34265","title":"WORKSHOP TECHNOLOGY I","author":"V K MANCHANDA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"34295","title":"ELECT. ENGG. DES. & DRG.-I","author":"J C KARHARA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"34438","title":"HIGHWAY ENGG","author":"N L ARORA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"34447","title":"ENGG. DRAWING-I","author":"N S KUMAR","publisher":"GEN.","price":200.0,"qty":1},{"accno":"34456","title":"CONSTRACTION MATERIALS","author":"AGGARWAL & ARORA","publisher":"GEN.","price":220.0,"qty":1},{"accno":"34486","title":"ENGG. DRAWING-II","author":"N S KUMAR","publisher":"GEN.","price":150.0,"qty":1},{"accno":"34655","title":"W/S TECHNOLOGY-III","author":"V K MANCHANDA","publisher":"GEN.","price":120.0,"qty":1},{"accno":"34731","title":"HIGHWAY ENGG","author":"N L ARORA","publisher":"GEN.","price":170.0,"qty":1},{"accno":"34858","title":"FUNDA. OF ELECT. ENGG. & ELEX.","author":"S K SEHDEV","publisher":"GEN.","price":375.0,"qty":1},{"accno":"34879","title":"SURVEYING -I","author":"DR. B C PUNMIA","publisher":"GEN.","price":525.0,"qty":1},{"accno":"6","title":"APPLIED PHYSICS V. I","author":"ARORA,B.L.","publisher":"SD","price":99.9,"qty":1},{"accno":"73","title":"COMMUNICATION SKILL-I","author":"RAJESH KAPOOR","publisher":"SD","price":79.9,"qty":1},{"accno":"145","title":"DIGITAL PRINCIPLICS & APP.","author":"MALVINO, A","publisher":"SD","price":185.0,"qty":1},{"accno":"159","title":"PROGRAMMING IN BASIC.","author":"BALAGURUSWAMY E.","publisher":"SD","price":105.0,"qty":1},{"accno":"299","title":"HTML DH+ ML","author":"BAGROS,I","publisher":"SD","price":390.0,"qty":1},{"accno":"300","title":"TCP /IP","author":"MCSE","publisher":"SD","price":450.0,"qty":1},{"accno":"316","title":"FORTRAN","author":"SALARIA,R.S.","publisher":"SD","price":175.0,"qty":1},{"accno":"338","title":"DATA BASE SYSTEMS CONCEPTS","author":"ABROHAM,SILBER","publisher":"SD","price":299.0,"qty":1},{"accno":"356","title":"DATA STRUCTURES","author":"LIPSCHUTZ","publisher":"SD","price":320.0,"qty":1},{"accno":"440","title":"MODERN ELECTRONICS EQUIPUMENT","author":"KHANPUR, R.S.","publisher":"SD","price":195.0,"qty":1},{"accno":"477","title":"ELECTRICAL MACHINES","author":"GUPTA ,J.B.","publisher":"SD","price":225.0,"qty":1},{"accno":"487","title":"Q / B. CIVIL ENGINEERING","author":"MURTHY.V.S.","publisher":"SD","price":215.0,"qty":1},{"accno":"516","title":"CIVIL ENGG.MATERIAL","author":"PARPIN. SINGH","publisher":"SD","price":95.0,"qty":1},{"accno":"537","title":"R.C.C.DESIGN","author":"AMARJIT AGG.","publisher":"SD","price":85.0,"qty":1},{"accno":"574","title":"HYDRAWICS","author":"CHOUDHREY","publisher":"SD","price":85.0,"qty":1},{"accno":"612","title":"GENERAL ENGLISH","author":"PURI, G.K.","publisher":"SD","price":120.0,"qty":1},{"accno":"635","title":"PRODUCTION MANAGEMENT","author":"SEHRAWAT, M.S.","publisher":"SD","price":60.0,"qty":1},{"accno":"729","title":"POWER SYSTEMS ENGINEERING","author":"CHAKRABARTI","publisher":"SD","price":170.0,"qty":1},{"accno":"738","title":"ELEC.ESTI.COSTING","author":"SURJIT SINGH","publisher":"SD","price":105.0,"qty":1},{"accno":"758","title":"ELEC.TECHNOLOGY","author":"JAIN","publisher":"SD","price":125.0,"qty":1},{"accno":"779","title":"INTERNAL COMPUSTION ENGG.","author":"BALLANEY, P.L.","publisher":"SD","price":115.0,"qty":1},{"accno":"842","title":"INDUSTRIAL ENGG.","author":"KUMAR B.","publisher":"SD","price":105.0,"qty":1},{"accno":"853","title":"INSPOCTBNQUALITY CONTROL","author":"SHARMA,S.C.","publisher":"SD","price":120.0,"qty":1},{"accno":"967","title":"ELEC. ENGINEERING & MATERIALS","author":"RAINA, K.B.","publisher":"SD","price":65.0,"qty":1},{"accno":"1097","title":"INTEGRATED CIRCUITS","author":"BITKAR.K.R.","publisher":"SD","price":175.0,"qty":1},{"accno":"1102","title":"MICROWAVE & RADAR","author":"MAINI,A.K.","publisher":"SD","price":130.0,"qty":1},{"accno":"1107","title":"POWER ELECTRONICS","author":"BIMBHRA, P.S.","publisher":"SD","price":135.0,"qty":1},{"accno":"1123","title":"PROJECTS & WORKING MODELS","author":"BHATIA, K.B.","publisher":"SD","price":50.0,"qty":1},{"accno":"1197","title":"MAINTENANCE ENGG.","author":"NAYAK, B.S.","publisher":"SD","price":40.0,"qty":1},{"accno":"1223","title":"ENGG. CHEMISTRY","author":"AGGARWAL,O.P","publisher":"SD","price":110.0,"qty":1},{"accno":"1309","title":"COMMUNICATION ENGG.","author":"MANOJ,KUMAR","publisher":"SD","price":85.0,"qty":1},{"accno":"1325","title":"MATHEMATICS","author":"EAGAL","publisher":"SD","price":108.0,"qty":1},{"accno":"1332","title":"WORKSHOP PRACTICE","author":"SAWARN SINGH","publisher":"SD","price":50.0,"qty":1},{"accno":"1359","title":"MATHEMATICS I","author":"RAJIV KUMAR","publisher":"SD","price":109.9,"qty":1},{"accno":"1387","title":"MATHEMATICS II","author":"RAJIV KUMAR","publisher":"SD","price":99.9,"qty":1},{"accno":"1410","title":"COMMUNICATION SKILL-I","author":"RAJESH KAPOOR","publisher":"SD","price":79.9,"qty":1},{"accno":"1465","title":"CHEMISTRY II","author":"KHATRI,A.S.","publisher":"SD","price":69.9,"qty":1},{"accno":"1500","title":"ENERGY SOURCES","author":"RAI, G.D.","publisher":"SD","price":130.0,"qty":1},{"accno":"1510","title":"OBJECT ORIENTED PROGRAMMING","author":"BARKAKATI.N.","publisher":"SD","price":180.0,"qty":1},{"accno":"2205","title":"BOILER OPERATION & MAINTENANCE","author":"AICTE.EDU","publisher":"AICTE","price":115.0,"qty":1},{"accno":"2237","title":"MAINTENANCE OF BUILDINGS","author":"PANCHD HARI,A.C.","publisher":"AICTE","price":200.0,"qty":1},{"accno":"2260","title":"INDUSTRIAL INSTRUMENTATION","author":"ECKMAN, D.P","publisher":"AICTE","price":100.0,"qty":1},{"accno":"2279","title":"POLYMER SCIENCE","author":"GOWARI KAR,V.R.","publisher":"AICTE","price":195.0,"qty":1},{"accno":"2338","title":"ELECTRICAL ESTIMATING COSTING","author":"SURJEET SINGH","publisher":"AICTE","price":170.0,"qty":1},{"accno":"2355","title":"ELEC. ENGINEERING DRAWING","author":"SURJEET SINGH","publisher":"AICTE","price":105.0,"qty":1},{"accno":"2400","title":"DIGITAL COMP. DESIGN","author":"MANO, M.","publisher":"AICTE","price":225.0,"qty":1},{"accno":"2430","title":"MAINTENANCE ENGINEERING & MANAGEMENT","author":"MISHRA, R.C.","publisher":"AICTE","price":150.0,"qty":1},{"accno":"2471","title":"DESIGN OF STEEL STRUCTURE","author":"SHARMA, J.L.","publisher":"AICTE","price":90.0,"qty":1},{"accno":"2495","title":"ENVIRMENTAL POLUTION AWARENESS","author":"SHARMA, B.R.","publisher":"AICTE","price":45.0,"qty":1},{"accno":"2515","title":"T.B. POLYMER V-I","author":"BHATNAGAR, H.S.","publisher":"AICTE","price":175.0,"qty":1},{"accno":"2522","title":"T.B. POLYMER V-II","author":"BHATNAGAR, H.S.","publisher":"AICTE","price":175.0,"qty":1},{"accno":"2526","title":"T.B. POLYMER V-3","author":"BHATNAGAR, H.S.","publisher":"AICTE","price":230.0,"qty":1},{"accno":"2533","title":"INDUSTRIAL MAINTENANCE","author":"GARG,H.P.","publisher":"AICTE","price":175.0,"qty":1},{"accno":"2568","title":"FAN. DATA BASE SYSTEM","author":"ELMASRI, R.","publisher":"AICTE","price":360.0,"qty":1},{"accno":"2595","title":"INFARMATION TECHNOLOGY","author":"RAJARAMAN, V.","publisher":"AICTE","price":225.0,"qty":1},{"accno":"2600","title":"PROGRAMMING WITH C","author":"VENUGOPAL,K.R.","publisher":"AICTE","price":195.0,"qty":1},{"accno":"2613","title":"I B M PC & CLONES","author":"GOVINDARAJA, B.","publisher":"AICTE","price":450.0,"qty":1},{"accno":"2639","title":"COMPUTER DESIGN","author":"KOKDE","publisher":"AICTE","price":130.0,"qty":1},{"accno":"2667","title":"MULTIMEDIA, TECH.LOGO & APP.","author":"HILLMAN, D.","publisher":"AICTE","price":120.0,"qty":1},{"accno":"2682","title":"MICRO PROCESSORS & INTERFACING","author":"HALL D.U.","publisher":"AICTE","price":295.0,"qty":1},{"accno":"2685","title":"UNIX CONCEPT & APP.","author":"DAS, SU.","publisher":"AICTE","price":260.0,"qty":1},{"accno":"2693","title":"MICROSOFT PROGRAMMING","author":"BALENA,F","publisher":"AICTE","price":799.0,"qty":1},{"accno":"2705","title":"DESKTOP PUBLISHING ON PC","author":"SHARMA, M.C.","publisher":"AICTE","price":99.0,"qty":1},{"accno":"2737","title":"ARTIFICIAL INTELLEGENCE","author":"NILSON","publisher":"AICTE","price":395.0,"qty":1},{"accno":"4","title":"CIVIL ENGG. MATERIALS","author":"AGGARWAL, ARORA","publisher":"BB","price":16.9,"qty":1},{"accno":"111","title":"CIVIL ENGG. DRAWING","author":"CHANDEL, R.P","publisher":"BB","price":12.0,"qty":1},{"accno":"256","title":"T.B. OF APP. MATHEMATICS FOR ELEC.ENGG.","author":"T.T.T.I.","publisher":"BB","price":11.0,"qty":1},{"accno":"312","title":"T.B.OF ENGG. MATHEMATICS","author":"K,K,SALHOTRA","publisher":"BB","price":15.0,"qty":1},{"accno":"319","title":"IRRIGATION ENGG.","author":"S.R.SAHASRADUDHE","publisher":"BB","price":13.5,"qty":1},{"accno":"366","title":"HYDRAULICS & HYDRAULICS MACHINES","author":"A.S.SARAO","publisher":"BB","price":16.5,"qty":1},{"accno":"448","title":"ENGG.MATHEMATICS","author":"SALHOTRA,K.K.","publisher":"BB","price":15.8,"qty":1},{"accno":"484","title":"T.B.OF ENGG. MATHEMATICS","author":"DINGRA K.K","publisher":"BB","price":16.95,"qty":1},{"accno":"520","title":"ELECTRICAL MACHINCS II","author":"ARORA P.C","publisher":"BB","price":15.0,"qty":1},{"accno":"557","title":"STRENGTH OF MATERILS","author":"SEETHARAMIAH U.S","publisher":"BB","price":15.0,"qty":1},{"accno":"599","title":"CHEMISTRY","author":"MEHTA& BANWAT","publisher":"BB","price":15.75,"qty":1},{"accno":"633","title":"GENERAL ENGLISH","author":"MANCHANDA& DHAWAN","publisher":"BB","price":10.5,"qty":1},{"accno":"655","title":"STRENGTH OF MATERILS","author":"MALHOTRA& GUPTA","publisher":"BB","price":17.5,"qty":1},{"accno":"773","title":"IRRIGATION ENGG.","author":"S.R.SAHASRABUDHE","publisher":"BB","price":13.5,"qty":1},{"accno":"888","title":"APP. MATHE FOR ELECT.ENGG.","author":"T.T.T.I.","publisher":"BB","price":11.0,"qty":1},{"accno":"920","title":"BASICS ELECTRONICS I","author":"V.K.MEHTA","publisher":"BB","price":12.75,"qty":1},{"accno":"979","title":"T.B. CONCRETE TECHNOLOGY","author":"OHRI M.L. AGG. R.K.","publisher":"BB","price":13.5,"qty":1},{"accno":"1031","title":"AUTOMOBIL ENGG.","author":"SARAO AGGARWAL","publisher":"BB","price":15.5,"qty":1},{"accno":"1051","title":"ELECTRICAL MACHINCS I","author":"ARORA P.C","publisher":"BB","price":13.5,"qty":1},{"accno":"1092","title":"ELEC.ENGG. MATERIALS","author":"RAINA K.B.","publisher":"BB","price":10.9,"qty":1},{"accno":"1112","title":"ELECTRICAL DESIGN & DRAWING II","author":"SURJIT SINGH","publisher":"BB","price":15.0,"qty":1},{"accno":"1215","title":"CIVIL ENGG. DRAWING","author":"N.S KUMAR","publisher":"BB","price":14.25,"qty":1},{"accno":"1327","title":"N.P.PHYSICS I","author":"CHAWLA.C.L.","publisher":"BB","price":11.25,"qty":1},{"accno":"1398","title":"T.B.ELECTRONICS III","author":"MEHTA, V.K.","publisher":"BB","price":14.9,"qty":1},{"accno":"1433","title":"CIVIL ENGG. MATERIALS","author":"AGGARWAL,A.","publisher":"BB","price":17.5,"qty":1},{"accno":"1451","title":"WATER SUPPLY & SANITARY ENGG.","author":"LAL. M.","publisher":"BB","price":17.9,"qty":1},{"accno":"1489","title":"SANITARY ENGG.","author":"LAL. M.","publisher":"BB","price":11.5,"qty":1},{"accno":"1747","title":"ELEC. ENGG. DRAWING V-I","author":"MARWAHA","publisher":"BB","price":14.9,"qty":1},{"accno":"1755","title":"ELEC. DESIGN & DRAWING","author":"MARWAHA G.L","publisher":"BB","price":14.9,"qty":1},{"accno":"1792","title":"BASICS ELECTRONICS I","author":"MEHTA, V.K.","publisher":"BB","price":12.75,"qty":1},{"accno":"1799","title":"BASICS ELECTRONICS II","author":"MEHTA, V.K.","publisher":"BB","price":12.25,"qty":1},{"accno":"1819","title":"REFRIGERATION & AIR CONDITIONING","author":"SARAO,A.S","publisher":"BB","price":15.0,"qty":1},{"accno":"1829","title":"ELEMENTRY REINFOREED CONCRETE DESIGN","author":"HANDU, B.L","publisher":"BB","price":17.5,"qty":1},{"accno":"1867","title":"BUILDING CONSTRUCTION","author":"SINGLA,D.R","publisher":"BB","price":22.5,"qty":1},{"accno":"1897","title":"CIVIL ENGG. DRAWING","author":"R.P.CHANDEL","publisher":"BB","price":15.0,"qty":1},{"accno":"1942","title":"STRUCTURAL DESIGN & DRAWING","author":"R.P.CHANDEL","publisher":"BB","price":20.0,"qty":1},{"accno":"2037","title":"HYDRAULICS","author":"D.R.MALHOTRA","publisher":"BB","price":16.5,"qty":1},{"accno":"2253","title":"THERMAL ENGG. II","author":"A.S.SARAO","publisher":"BB","price":15.0,"qty":1},{"accno":"2282","title":"CIVIL ENGG. MATERIALS","author":"AGGARWAL & ARORA","publisher":"BB","price":19.9,"qty":1},{"accno":"2322","title":"SOIL ENGG.","author":"R.K.AGGARWAL","publisher":"BB","price":19.9,"qty":1},{"accno":"2391","title":"ELECT. DESIGN & DRAWING P-II","author":"G.L MARWAHA","publisher":"BB","price":16.9,"qty":1},{"accno":"2554","title":"SURVEYING -I","author":"C.L KOCHHAR","publisher":"BB","price":18.5,"qty":1},{"accno":"2607","title":"G.P.S.E","author":"MITTAL & KAPOOR","publisher":"BB","price":12.5,"qty":1},{"accno":"2625","title":"STRUCTURES  I","author":"B.B TANGRI","publisher":"BB","price":15.0,"qty":1},{"accno":"2664","title":"RAILWAY BRIDGES & TUNNELS","author":"ARORA , N.L","publisher":"BB","price":22.9,"qty":1},{"accno":"2764","title":"SURVEYING -II","author":"KOCHHER, C.L","publisher":"BB","price":17.5,"qty":1},{"accno":"2788","title":"FUNDAMENTALS OF APPLIED MECHANICS","author":"PARMAR, M.S.","publisher":"BB","price":20.0,"qty":1},{"accno":"2863","title":"ALTERNATING CURRENT MACHINES","author":"SAY, M.G","publisher":"BB","price":57.05,"qty":1},{"accno":"2883","title":"ELECT. ENGG. MATH.","author":"SALHOTRA, A.K","publisher":"BB","price":25.0,"qty":1},{"accno":"2906","title":"UTILIZATION OF ELECT. ENERGY","author":"RAWLLY, MITTAL","publisher":"BB","price":12.5,"qty":1},{"accno":"2928","title":"ENGG. DRAWING I","author":"DHAWAN R.K.","publisher":"BB","price":15.0,"qty":1},{"accno":"2945","title":"MATERIALS & METALLURGY","author":"NAT. D.S","publisher":"BB","price":17.5,"qty":1},{"accno":"2962","title":"AUTOMOBILE ENGG.","author":"AGGARWAL","publisher":"BB","price":18.5,"qty":1},{"accno":"3005","title":"P.W.D CONSTRUCTION MANAGEMENT & ACC.","author":"AGGARWAL & AMARJIT","publisher":"BB","price":26.5,"qty":1},{"accno":"3013","title":"CIVIL ENGG. MATERIALS","author":"HANDOO, B.L","publisher":"BB","price":15.0,"qty":1},{"accno":"3090","title":"APPLIED MATHEMATICS II SEM.","author":"SALHOTRA, A.K","publisher":"BB","price":27.5,"qty":1},{"accno":"3103","title":"STRUCTURAL DESIGN & DRAWING V CIVIL","author":"SHARMA,B.K","publisher":"BB","price":25.0,"qty":1},{"accno":"3123","title":"ENGG. MATHEMATICS","author":"DHINGRA, KOHLI","publisher":"BB","price":19.75,"qty":1},{"accno":"3169","title":"PHYSICS","author":"BANWAT","publisher":"BB","price":24.9,"qty":1},{"accno":"3184","title":"APPLIED CHEMISTRY.","author":"KHATRY,A.S& BANWAT","publisher":"BB","price":19.2,"qty":1},{"accno":"3216","title":"GENERAL ENGG.","author":"DHAWAN","publisher":"BB","price":14.9,"qty":1},{"accno":"3316","title":"GENERAL ENGG. II","author":"ROSAN LAL","publisher":"BB","price":18.5,"qty":1},{"accno":"3382","title":"HIGHWAY ENGG.","author":"ARORA,N.L","publisher":"BB","price":23.9,"qty":1},{"accno":"3392","title":"NEW CHEMISTRY","author":"J. M.SEHGAL","publisher":"BB","price":35.0,"qty":1},{"accno":"3406","title":"ENGG.MATHEMATICS ISEM.","author":"B.S.TYAGI","publisher":"BB","price":29.9,"qty":1},{"accno":"3489","title":"SURVEYING&LEVELLING I","author":"A.AGGARWAL","publisher":"BB","price":19.9,"qty":1},{"accno":"3524","title":"ELECT. TECHNOLOGY","author":"HUGHES E","publisher":"BB","price":40.75,"qty":1},{"accno":"3526","title":"ELECTRONIC DEVICES & CIRCUITS","author":"G.K MITTAL","publisher":"BB","price":65.0,"qty":1},{"accno":"3588","title":"APPLIED PHYSICS -I","author":"R.A BANWAT","publisher":"BB","price":32.9,"qty":1},{"accno":"3614","title":"APPLIED PHYSICS -II","author":"R.A BANWAT","publisher":"BB","price":32.9,"qty":1},{"accno":"3668","title":"ENGG. MATHEMATICS -II SEM.","author":"K.K DHINGRA","publisher":"BB","price":36.9,"qty":1},{"accno":"3686","title":"UTILIZATION OF ELECT. ENERGY","author":"B.R SHARMA","publisher":"BB","price":10.0,"qty":1},{"accno":"3713","title":"SOIL MECH. & FOUNDATION ENGG.","author":"BHARAT SINGH","publisher":"BB","price":35.0,"qty":1},{"accno":"3769","title":"HYDRAULICS & HYDRAULICS MACHINES","author":"A.S SARAO","publisher":"BB","price":27.5,"qty":1},{"accno":"3773","title":"ELECT. & ELEX. MEASUREMENT & INSTRU.","author":"UMESH SINGH","publisher":"BB","price":60.0,"qty":1},{"accno":"3817","title":"SURVEYING & LEVELLING I","author":"KANETKAR T.P.","publisher":"BB","price":35.0,"qty":1},{"accno":"3880","title":"LIBRARY OF SOCIETY","author":"J.K KHANNA","publisher":"BB","price":250.0,"qty":1},{"accno":"3935","title":"GENERAL ENGLISH","author":"R.K CHATRATH","publisher":"BB","price":27.9,"qty":1},{"accno":"3941","title":"ENGG. ELECT. ENGG. MATH.","author":"A.K SALHOTRA","publisher":"BB","price":45.0,"qty":1},{"accno":"3955","title":"SURVEYING V-III","author":"B.C. PUNMIA","publisher":"BB","price":35.0,"qty":1},{"accno":"3994","title":"ENGG. MATHEMATICS","author":"K.K DHINGRA","publisher":"BB","price":36.9,"qty":1},{"accno":"4042","title":"APPLIED PHYSICS","author":"R.A BANWAT","publisher":"BB","price":32.9,"qty":1},{"accno":"4079","title":"BASICS OF ELECTRONICS II","author":"S.KUMAR","publisher":"BB","price":29.9,"qty":1},{"accno":"4127","title":"ELECT. INSTRUMENTS & MEASUREMENTS","author":"S.K SAHDEV","publisher":"BB","price":24.9,"qty":1},{"accno":"4155","title":"STRUCTURES - I","author":"M.L OHRI","publisher":"BB","price":39.9,"qty":1},{"accno":"4184","title":"DESIGN OF IRRIGATION STRUCTURES","author":"P.P SEHGAL","publisher":"BB","price":15.0,"qty":1},{"accno":"25","title":"FUNDAMENTAL OF APP. MECHANICS","author":"M K GARG","publisher":"SC","price":225.0,"qty":1},{"accno":"66","title":"MACHINE DRAWING","author":"K K DHIMAN","publisher":"SC","price":150.0,"qty":1},{"accno":"107","title":"INDUSTRIAL ENGG.","author":"S S DAHIYA","publisher":"SC","price":175.0,"qty":1},{"accno":"168","title":"WORKSHOP TECH. I","author":"BAJAJ, SANDEEP","publisher":"SC","price":190.0,"qty":1},{"accno":"217","title":"HYDRAULICS & HYDRAULICS MACHINE","author":"M K GARG","publisher":"SC","price":200.0,"qty":1},{"accno":"272","title":"ENVIRONMENTAL EDU.","author":"M K GARG","publisher":"SC","price":100.0,"qty":1},{"accno":"330","title":"INSPECTION & QUALITY CONTROL","author":"SANDEEP BAJAJ","publisher":"SC","price":200.0,"qty":1},{"accno":"345","title":"E D M","author":"M K GARG","publisher":"SC","price":175.0,"qty":1},{"accno":"403","title":"POWER ELECTRONICS","author":"PUR SANJAY & CHOPRA","publisher":"SC","price":200.0,"qty":1},{"accno":"432","title":"ELECTRONIC INSTRUMENTS & MEASUREMENT","author":"RAJEEV SAPRA","publisher":"SC","price":150.0,"qty":1},{"accno":"482","title":"ANALOG ELEX.-II","author":"D R ARORA","publisher":"SC","price":200.0,"qty":1},{"accno":"489","title":"DIGITAL ELEX.-I","author":"YASHPAL & SANJEEV KUMAR","publisher":"SC","price":200.0,"qty":1},{"accno":"547","title":"CONSUMER ELEX.","author":"YAGYIK & JAIN","publisher":"SC","price":250.0,"qty":1},{"accno":"550","title":"WIRELESS & MOBILE COMMUNICATION","author":"V K SANGER","publisher":"SC","price":175.0,"qty":1},{"accno":"594","title":"ELECT. MACHINES","author":"D R ARORA","publisher":"SC","price":125.0,"qty":1},{"accno":"638","title":"OPTICAL FIBRE COMMUNICATION","author":"YASHPAL & SANJEEV KUMAR","publisher":"SC","price":160.0,"qty":1},{"accno":"667","title":"COMMUNICATION SYSTEM","author":"DEEPIKA CHADHA","publisher":"SC","price":125.0,"qty":1},{"accno":"731","title":"OPTICAL FIBRE COMMUNICATION","author":"RAJESH KUMAR","publisher":"SC","price":178.0,"qty":1},{"accno":"807","title":"ELECT. MACHINES I","author":"S K SEHDEV","publisher":"SC","price":280.0,"qty":1},{"accno":"852","title":"ELECT. MEASUREMENT & MEASURING INSTRUMENTS","author":"D R ARORA","publisher":"SC","price":190.0,"qty":1},{"accno":"871","title":"ELECTRONICS I","author":"D R ARORA","publisher":"SC","price":225.0,"qty":1},{"accno":"906","title":"ELECTRONICS II","author":"D R ARORA","publisher":"SC","price":200.0,"qty":1},{"accno":"924","title":"ELECT. POWER - I","author":"MANDEEP SINGH","publisher":"SC","price":250.0,"qty":1},{"accno":"946","title":"FUNDAMENTALS OF ELECT. ENGG.","author":"G L MARWAH","publisher":"SC","price":218.0,"qty":1},{"accno":"960","title":"ELECT. POWER - I","author":"G L MARWAH","publisher":"SC","price":228.0,"qty":1},{"accno":"1167","title":"APP. MECHANICS","author":"ASHIT BAJAJ","publisher":"SC","price":225.0,"qty":1},{"accno":"1334","title":"REPAIR & MAINTANANCE OF BUILDING","author":"M K GARG","publisher":"SC","price":125.0,"qty":1},{"accno":"1411","title":"STRUCTURAL DRAWING (RCC & STEEL)","author":"M K GARG, TANGRI","publisher":"SC","price":150.0,"qty":1},{"accno":"1420","title":"CONCRETE TECHNOLOGY","author":"SACHDEVA & BAJAJ","publisher":"SC","price":190.0,"qty":1},{"accno":"1659","title":"DIGITAL ELEX.","author":"K S JAMWAL","publisher":"SC","price":260.0,"qty":1},{"accno":"1757","title":"ELECT. MACHINES-II","author":"J B GUPTA","publisher":"SC","price":265.0,"qty":1},{"accno":"2103","title":"IRRIGATION & WATER POWER ENGG.","author":"B C PUNNIA","publisher":"SC","price":795.0,"qty":1}];
-
-/* =====================================================
-   IN-MEMORY CACHE (synced with Firebase)
-   ===================================================== */
-let _books = [], _students = [], _issued = [];
-let fbReady = false;
-
-/* =====================================================
-   AUDIO ENGINE
-   ===================================================== */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx;
-function initAudio() { if (!audioCtx) audioCtx = new AudioCtx(); }
-function clickSound() {
-  initAudio();
-  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-  o.connect(g); g.connect(audioCtx.destination);
-  o.frequency.setValueAtTime(900, audioCtx.currentTime);
-  o.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.06);
-  g.gain.setValueAtTime(0.18, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.07);
-  o.start(); o.stop(audioCtx.currentTime + 0.08);
-}
-function wordSound(i) {
-  initAudio();
-  const freqs = [440, 523, 659];
-  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-  o.connect(g); g.connect(audioCtx.destination);
-  o.type = 'triangle';
-  o.frequency.setValueAtTime(freqs[i % 3], audioCtx.currentTime);
-  o.frequency.exponentialRampToValueAtTime(freqs[i % 3] * 1.5, audioCtx.currentTime + 0.12);
-  g.gain.setValueAtTime(0.22, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
-  o.start(); o.stop(audioCtx.currentTime + 0.28);
-}
-function playCollegeTune() {
-  initAudio();
-  [{f:261.6,t:0},{f:329.6,t:.2},{f:392,t:.4},{f:523.2,t:.6},{f:392,t:.85},{f:440,t:1.05},{f:523.2,t:1.3},{f:659.2,t:1.55},{f:523.2,t:1.9},{f:392,t:2.1}]
-  .forEach(n => {
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.connect(g); g.connect(audioCtx.destination);
-    o.type = 'sine';
-    const s = audioCtx.currentTime + n.t;
-    o.frequency.setValueAtTime(n.f, s);
-    g.gain.setValueAtTime(0, s); g.gain.linearRampToValueAtTime(0.2, s+.05);
-    g.gain.exponentialRampToValueAtTime(0.001, s+.3);
-    o.start(s); o.stop(s+.35);
-  });
-}
-
-/* =====================================================
-   FIREBASE HELPERS
-   ===================================================== */
-function setFbStatus(state, text) {
-  const el = document.getElementById('fb-status');
-  el.className = state;
-  document.getElementById('fb-status-text').textContent = text;
-}
-
-async function fbWrite(path, data) {
-  if (!fbReady) return;
-  const { db, ref, set } = window._fb;
-  await set(ref(db, path), data);
-}
-
-async function fbGet(path) {
-  if (!fbReady) return null;
-  const { db, ref, get } = window._fb;
-  const snap = await get(ref(db, path));
-  return snap.exists() ? snap.val() : null;
-}
-
-function fbListen(path, cb) {
-  if (!fbReady) return;
-  const { db, ref, onValue } = window._fb;
-  onValue(ref(db, path), snap => cb(snap.exists() ? snap.val() : null));
-}
-
-/* Convert object-map from Firebase back to array */
-function objToArr(obj) {
-  if (!obj) return [];
-  if (Array.isArray(obj)) return obj;
-  return Object.values(obj);
-}
-
-/* =====================================================
-   INIT FIREBASE DATA
-   ===================================================== */
-async function initFirebaseData() {
-  try {
-    setFbStatus('', 'Connecting…');
-
-    // Check if books exist in Firebase
-    const existingBooks = await fbGet('books');
-    if (!existingBooks) {
-      // First time: upload seed books
-      setFbStatus('', 'Uploading library data…');
-      document.getElementById('loading-msg').textContent = 'UPLOADING 1299 BOOKS…';
-      const booksObj = {};
-      SEED_BOOKS.forEach(b => { booksObj[b.accno] = b; });
-      await fbWrite('books', booksObj);
-    }
-
-    // Real-time listeners
-    fbListen('books', val => {
-      _books = objToArr(val);
-      if (currentPage === 'books') renderBooksTable();
-      if (adminLoggedIn) { renderWriteOffTable(); populateIssueBookDropdown(); updateStats(); }
-    });
-    fbListen('students', val => {
-      _students = objToArr(val);
-      if (adminLoggedIn) { renderStudentsTable(); updateStats(); }
-    });
-    fbListen('issued', val => {
-      _issued = objToArr(val);
-      if (adminLoggedIn) { renderIssuedTable(); updateStats(); }
-    });
-
-    setFbStatus('connected', 'Live · Firebase');
-
-  } catch(err) {
-    console.error('Firebase error:', err);
-    setFbStatus('error', 'Offline mode');
-    // Fallback to local storage
-    _books = JSON.parse(localStorage.getItem('crp_books') || 'null') || SEED_BOOKS;
-    _students = JSON.parse(localStorage.getItem('crp_students') || '[]');
-    _issued = JSON.parse(localStorage.getItem('crp_issued') || '[]');
-    showToast('Firebase unavailable – using local storage', 'error');
-  }
-}
-
-/* =====================================================
-   PAGE ROUTING
-   ===================================================== */
-let currentPage = '';
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  currentPage = id;
-  if (id === 'books') renderBooksTable();
-  window.scrollTo(0, 0);
-}
-
-/* =====================================================
-   LANDING ANIMATION
-   ===================================================== */
-let landingTapped = false;
-function animateLanding() {
-  const words = document.querySelectorAll('.college-name .word');
-  [200, 650, 1200].forEach((d, i) => {
-    setTimeout(() => { words[i].classList.add('visible'); wordSound(i); }, d);
-  });
-  setTimeout(() => { document.getElementById('library-title').classList.add('visible'); wordSound(0); }, 2000);
-  setTimeout(() => document.getElementById('gold-line').classList.add('visible'), 2400);
-  setTimeout(() => document.getElementById('tap-hint').classList.add('visible'), 2700);
-  setTimeout(playCollegeTune, 300);
-}
-function handleLandingTap() {
-  if (landingTapped) return;
-  landingTapped = true;
-  initAudio(); clickSound();
-  const l = document.getElementById('landing');
-  l.style.transition = 'opacity 0.5s ease'; l.style.opacity = '0'; l.style.pointerEvents = 'none';
-  setTimeout(() => showPage('options'), 500);
-}
-
-/* =====================================================
-   BOOKS TABLE
-   ===================================================== */
-let selectedBook = null;
-function renderBooksTable() {
-  const q = (document.getElementById('books-search')?.value || '').toLowerCase();
-  const books = _books.filter(b =>
-    !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) ||
-    (b.publisher||'').toLowerCase().includes(q) || b.accno.toLowerCase().includes(q)
-  );
-  const tbody = document.getElementById('books-tbody');
-  if (!books.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-book-open"></i><p>No books found</p></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = books.map((b, i) => `
-    <tr onclick="clickSound();openBookModal('${escAttr(b.accno)}')">
-      <td>${escHtml(b.accno)}</td>
-      <td style="font-weight:500">${escHtml(b.title)}</td>
-      <td>${escHtml(b.author)}</td>
-      <td>${escHtml(b.publisher||'—')}</td>
-      <td><span class="badge ${Number(b.qty)>0?'badge-green':'badge-red'}">${b.qty}</span></td>
-      <td style="color:var(--gold);font-weight:600">₹${Number(b.price).toLocaleString('en-IN')}</td>
-    </tr>
-  `).join('');
-}
-
-function openBookModal(accno) {
-  const book = _books.find(b => b.accno === accno);
-  if (!book) return;
-  selectedBook = book;
-  document.getElementById('bm-title').textContent  = book.title;
-  document.getElementById('bm-author').textContent = 'by ' + book.author;
-  document.getElementById('bm-price').textContent  = '₹' + Number(book.price).toLocaleString('en-IN');
-  ['bm-uname','bm-rollno','bm-phone','bm-branch'].forEach(id => document.getElementById(id).value='');
-  openModal('book-modal');
-}
-
-async function confirmBookRequest() {
-  const name   = document.getElementById('bm-uname').value.trim();
-  const rollno = document.getElementById('bm-rollno').value.trim();
-  const phone  = document.getElementById('bm-phone').value.trim();
-  const branch = document.getElementById('bm-branch').value.trim();
-  if (!name||!rollno||!phone) { showToast('Please fill required fields','error'); return; }
-  if (!selectedBook) return;
-
-  const rec = {
-    id: Date.now(), rollno, name, phone, branch,
-    accno: selectedBook.accno, title: selectedBook.title,
-    issueDate: new Date().toISOString().split('T')[0],
-    returnDate: '', source: 'self-request'
-  };
-
-  try {
-    // Update book qty
-    const newQty = Math.max(0, Number(selectedBook.qty) - 1);
-    await fbWrite(`books/${selectedBook.accno}/qty`, newQty);
-    await fbWrite(`issued/${rec.id}`, rec);
-    closeModal('book-modal');
-    showToast(`Book requested successfully! ✓`);
-  } catch(e) {
-    showToast('Error saving request: ' + e.message, 'error');
-  }
-}
-
-/* =====================================================
-   ADMIN
-   ===================================================== */
-let adminLoggedIn = false;
-
-function adminLogin() {
-  const pw = document.getElementById('admin-password').value;
-  if (pw === 'chhoturam2026') {
-    adminLoggedIn = true;
-    document.getElementById('admin-login-wrap').style.display  = 'none';
-    document.getElementById('admin-dashboard').style.display   = 'flex';
-    document.getElementById('admin-logged-badge').style.display= 'block';
-    refreshAdminData();
-    showToast('Welcome, Administrator!');
-  } else {
-    document.getElementById('login-error').style.display = 'block';
-    document.getElementById('admin-password').value = '';
-    setTimeout(() => document.getElementById('login-error').style.display='none', 3000);
-  }
-}
-
-function adminLogout() {
-  if (adminLoggedIn) {
-    adminLoggedIn = false;
-    document.getElementById('admin-login-wrap').style.display  = 'flex';
-    document.getElementById('admin-dashboard').style.display   = 'none';
-    document.getElementById('admin-logged-badge').style.display= 'none';
-    document.getElementById('admin-password').value = '';
-  }
-  showPage('options');
-}
-
-function refreshAdminData() {
-  updateStats(); renderWriteOffTable(); renderStudentsTable(); renderIssuedTable(); populateIssueBookDropdown();
-  const today = new Date().toISOString().split('T')[0];
-  const ret = new Date(); ret.setDate(ret.getDate()+14);
-  if (document.getElementById('ib-date'))   document.getElementById('ib-date').value   = today;
-  if (document.getElementById('ib-return')) document.getElementById('ib-return').value = ret.toISOString().split('T')[0];
-}
-
-function updateStats() {
-  const totalQty = _books.reduce((s,b) => s + Number(b.qty||0), 0);
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-num">${_books.length}</div><div class="stat-label">Book Titles</div></div>
-    <div class="stat-card"><div class="stat-num">${totalQty}</div><div class="stat-label">Total Copies</div></div>
-    <div class="stat-card"><div class="stat-num">${_students.length}</div><div class="stat-label">Students</div></div>
-    <div class="stat-card"><div class="stat-num">${_issued.length}</div><div class="stat-label">Issued Records</div></div>
-  `;
-}
-
-function switchAdminTab(tabId, btn) {
-  clickSound();
-  document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-'+tabId).classList.add('active');
-  btn.classList.add('active');
-}
-
-/* ----- ADD BOOK ----- */
-async function addBook() {
-  const accno = document.getElementById('ab-accno').value.trim();
-  const title = document.getElementById('ab-title').value.trim();
-  const author= document.getElementById('ab-author').value.trim();
-  const pub   = document.getElementById('ab-publisher').value.trim();
-  const price = parseFloat(document.getElementById('ab-price').value)||0;
-  const qty   = parseInt(document.getElementById('ab-qty').value)||1;
-  if (!accno||!title||!author) { showToast('Fill required fields (*)','error'); return; }
-  if (_books.find(b => b.accno === accno)) { showToast('Accession No already exists','error'); return; }
-  try {
-    await fbWrite(`books/${accno}`, {accno, title, author, publisher:pub, price, qty});
-    clearAddForm(); updateStats(); populateIssueBookDropdown();
-    showToast(`"${title}" added successfully!`);
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
-
-async function resetToSeedBooks() {
-  if (!confirm('Replace current books with all original books? This cannot be undone.')) return;
-  try {
-    const obj = {};
-    SEED_BOOKS.forEach(b => { obj[b.accno] = b; });
-    await fbWrite('books', obj);
-    showToast('All books reloaded successfully!');
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
-
-function clearAddForm() {
-  ['ab-accno','ab-title','ab-author','ab-publisher','ab-price'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('ab-qty').value = '1';
-}
-
-/* ----- EXCEL UPLOAD (BOOKS) ----- */
-function handleBookExcel(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async function(ev) {
-    try {
-      const data = new Uint8Array(ev.target.result);
-      let rows;
-      if (file.name.endsWith('.csv')) {
-        rows = csvToRows(new TextDecoder().decode(data));
-      } else {
-        const wb = XLSX.read(data, {type:'array'});
-        rows = [];
-        wb.SheetNames.forEach(sn => {
-          const ws = wb.Sheets[sn];
-          XLSX.utils.sheet_to_json(ws, {defval:''}).forEach(r => { r.__sheet = sn; rows.push(r); });
-        });
-      }
-      function getCol(r, ...keys) {
-        for (const k of keys) {
-          if (r[k] !== undefined && r[k] !== '') return r[k];
-          const found = Object.keys(r).find(rk => rk.trim().toUpperCase() === k.toUpperCase());
-          if (found && r[found] !== '') return r[found];
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyRoof Construction - Professional Roofing Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #FF6B35;
+            --dark-blue: #1e3a8a;
+            --darker-blue: #0f172a;
+            --light-blue: #3b82f6;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
         }
-        return '';
-      }
-      let added=0, skipped=0;
-      const updates = {};
-      rows.forEach(r => {
-        const accno = String(getCol(r,'ACC.NO.','ACC. NO.','ACCNO','Accession No','accno')||'').trim();
-        const title = String(getCol(r,'TITLE','Book Title','title')||'').trim();
-        const author= String(getCol(r,'AUTHOR','Author Name','author')||'').trim();
-        const pub   = String(getCol(r,'PUBLISHER','Publisher','publisher',r.__sheet||'')||r.__sheet||'').trim();
-        const price = parseFloat(getCol(r,'MRP','PRICE','Price','Amount','price'))||0;
-        const qty   = parseInt(getCol(r,'QUANTITY','QTY','Quantity','qty'))||1;
-        if (!accno||!title) { skipped++; return; }
-        if (_books.find(b=>b.accno===accno)) { skipped++; return; }
-        updates[accno] = {accno, title, author, publisher:pub, price, qty};
-        added++;
-      });
-      if (added > 0) {
-        const { db, ref, update } = window._fb;
-        await update(ref(db, 'books'), updates);
-      }
-      showToast(`${added} books added, ${skipped} skipped`);
-      document.getElementById('excel-book-preview').innerHTML =
-        `<p style="font-size:0.82rem;color:var(--success)">✓ ${added} books imported to Firebase</p>`;
-    } catch(err) { showToast('Error: '+err.message,'error'); }
-  };
-  reader.readAsArrayBuffer(file);
-  e.target.value='';
-}
 
-/* ----- ISSUE BOOK ----- */
-function populateIssueBookDropdown() {
-  const sel = document.getElementById('ib-book'); if (!sel) return;
-  const books = _books.filter(b => Number(b.qty) > 0);
-  sel.innerHTML = '<option value="">— Select a book —</option>' +
-    books.map(b => `<option value="${escAttr(b.accno)}">${escHtml(b.accno)} — ${escHtml(b.title)} (Qty:${b.qty})</option>`).join('');
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-async function issueBook() {
-  const rollno = document.getElementById('ib-rollno').value.trim();
-  const sname  = document.getElementById('ib-sname').value.trim();
-  const phone  = document.getElementById('ib-phone').value.trim();
-  const branch = document.getElementById('ib-branch').value.trim();
-  const accno  = document.getElementById('ib-book').value;
-  const iDate  = document.getElementById('ib-date').value;
-  const rDate  = document.getElementById('ib-return').value;
-  if (!rollno||!sname||!accno) { showToast('Fill required fields (*)','error'); return; }
-  const bk = _books.find(b => b.accno === accno);
-  if (!bk||Number(bk.qty)<=0) { showToast('Book not available','error'); return; }
-  try {
-    const id = Date.now();
-    await fbWrite(`books/${accno}/qty`, Number(bk.qty) - 1);
-    await fbWrite(`issued/${id}`, {id, rollno, name:sname, phone, branch, accno, title:bk.title, issueDate:iDate, returnDate:rDate, source:'admin'});
-    ['ib-rollno','ib-sname','ib-phone','ib-branch'].forEach(id => document.getElementById(id).value='');
-    document.getElementById('ib-book').value='';
-    showToast(`Book issued to ${sname} ✓`);
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
+        html {
+            scroll-behavior: smooth;
+        }
 
-function handleIssueExcel(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async function(ev) {
-    try {
-      const data = new Uint8Array(ev.target.result);
-      const rows = file.name.endsWith('.csv')
-        ? csvToRows(new TextDecoder().decode(data))
-        : XLSX.utils.sheet_to_json(XLSX.read(data,{type:'array'}).Sheets[XLSX.read(data,{type:'array'}).SheetNames[0]], {defval:''});
-      let added = 0;
-      for (const r of rows) {
-        const rollno = String(r['Roll No']||r['rollno']||'').trim();
-        const accno  = String(r['Accession No']||r['accno']||'').trim();
-        if (!rollno||!accno) continue;
-        const bk = _books.find(b=>b.accno===accno);
-        if (!bk||Number(bk.qty)<=0) continue;
-        const id = Date.now() + Math.random();
-        await fbWrite(`books/${accno}/qty`, Number(bk.qty)-1);
-        await fbWrite(`issued/${id}`, {id, rollno, name:String(r['Student Name']||''), phone:String(r['Phone']||''), branch:String(r['Branch']||''), accno, title:bk.title, issueDate:String(r['Issue Date']||''), returnDate:String(r['Return Date']||''), source:'admin-bulk'});
-        added++;
-      }
-      showToast(`${added} issue records added`);
-    } catch(err) { showToast('Error: '+err.message,'error'); }
-  };
-  reader.readAsArrayBuffer(file);
-  e.target.value='';
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--gray-800);
+            overflow-x: hidden;
+        }
 
-/* ----- WRITE-OFF ----- */
-let woTargetAccno = null;
-function renderWriteOffTable() {
-  const q = (document.getElementById('wo-search')?.value||'').toLowerCase();
-  const books = _books.filter(b => !q || b.title.toLowerCase().includes(q) || b.accno.toLowerCase().includes(q) || b.author.toLowerCase().includes(q));
-  const tbody = document.getElementById('wo-tbody');
-  if (!books.length) { tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="fas fa-book"></i><p>No books</p></div></td></tr>`; return; }
-  tbody.innerHTML = books.map(b => `
-    <tr>
-      <td>${escHtml(b.accno)}</td><td>${escHtml(b.title)}</td><td>${escHtml(b.author)}</td>
-      <td>${escHtml(b.publisher||'—')}</td><td>${b.qty}</td>
-      <td>₹${Number(b.price).toLocaleString('en-IN')}</td>
-      <td><button class="tbl-btn tbl-btn-danger" onclick="clickSound();openWriteOff('${escAttr(b.accno)}','${escAttr(b.title)}')"><i class="fas fa-trash"></i> Write-Off</button></td>
-    </tr>
-  `).join('');
-}
+        /* Sound Toggle Button */
+        .sound-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, var(--primary-orange), var(--dark-blue));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 9998;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-function openWriteOff(accno, title) {
-  woTargetAccno = accno;
-  document.getElementById('wo-book-name').textContent = title;
-  openModal('writeoff-modal');
-}
+        .sound-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.5);
+        }
 
-async function confirmWriteOff() {
-  if (!woTargetAccno) return;
-  try {
-    const { db, ref, remove } = window._fb;
-    await remove(ref(db, `books/${woTargetAccno}`));
-    closeModal('writeoff-modal');
-    showToast('Book written off successfully');
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
+        .sound-toggle.muted {
+            background: var(--gray-600);
+        }
 
-/* ----- REGISTER STUDENT ----- */
-async function registerStudent() {
-  const rollno = document.getElementById('rs-rollno').value.trim();
-  const name   = document.getElementById('rs-name').value.trim();
-  const phone  = document.getElementById('rs-phone').value.trim();
-  const branch = document.getElementById('rs-branch').value.trim();
-  const sem    = document.getElementById('rs-sem').value;
-  const email  = document.getElementById('rs-email').value.trim();
-  if (!rollno||!name||!phone) { showToast('Fill required fields (*)','error'); return; }
-  if (_students.find(s=>s.rollno===rollno)) { showToast('Roll No already registered','error'); return; }
-  try {
-    await fbWrite(`students/${rollno}`, {id:Date.now(), rollno, name, phone, branch, sem, email});
-    clearRegForm();
-    showToast(`${name} registered ✓`);
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
+        /* Loading Screen - Apple Style */
+        .loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
 
-function clearRegForm() {
-  ['rs-rollno','rs-name','rs-phone','rs-branch','rs-email'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('rs-sem').value='';
-}
+        .loader-wrapper.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
 
-/* ----- ALL STUDENTS ----- */
-function renderStudentsTable() {
-  const q = (document.getElementById('students-search')?.value||'').toLowerCase();
-  const students = _students.filter(s => !q || s.name.toLowerCase().includes(q) || s.rollno.toLowerCase().includes(q) || (s.branch||'').toLowerCase().includes(q));
-  const tbody = document.getElementById('students-tbody');
-  if (!students.length) { tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><i class="fas fa-users"></i><p>No students registered</p></div></td></tr>`; return; }
-  tbody.innerHTML = students.map((s,i) => `
-    <tr>
-      <td>${i+1}</td><td>${escHtml(s.rollno)}</td><td style="font-weight:500">${escHtml(s.name)}</td>
-      <td>${escHtml(s.phone)}</td><td>${escHtml(s.branch||'—')}</td><td>${escHtml(s.sem||'—')}</td>
-      <td>${escHtml(s.email||'—')}</td>
-      <td class="no-print"><button class="tbl-btn tbl-btn-danger" onclick="clickSound();deleteStudent('${escAttr(s.rollno)}')"><i class="fas fa-trash"></i></button></td>
-    </tr>
-  `).join('');
-}
+        .loader-logo {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            animation: pulse 2s ease-in-out infinite;
+        }
 
-async function deleteStudent(rollno) {
-  try {
-    const { db, ref, remove } = window._fb;
-    await remove(ref(db, `students/${rollno}`));
-    showToast('Student removed');
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
-function printStudents() { window.print(); }
+        .loader-logo i {
+            font-size: 80px;
+            color: #ffffff;
+        }
 
-/* ----- ISSUED RECORDS ----- */
-function renderIssuedTable() {
-  const q = (document.getElementById('issued-search')?.value||'').toLowerCase();
-  const issued = _issued.filter(r => !q || r.name.toLowerCase().includes(q) || r.rollno.toLowerCase().includes(q) || r.title.toLowerCase().includes(q));
-  const tbody = document.getElementById('issued-tbody');
-  if (!issued.length) { tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><i class="fas fa-list-check"></i><p>No issued records</p></div></td></tr>`; return; }
-  tbody.innerHTML = issued.map((r,i) => `
-    <tr>
-      <td>${i+1}</td><td>${escHtml(r.rollno)}</td><td style="font-weight:500">${escHtml(r.name)}</td>
-      <td>${escHtml(r.phone||'—')}</td><td>${escHtml(r.branch||'—')}</td>
-      <td>${escHtml(r.title)}</td><td style="color:var(--gold)">${escHtml(r.accno)}</td>
-      <td>${escHtml(r.issueDate||'—')}</td><td>${escHtml(r.returnDate||'—')}</td>
-      <td class="no-print"><button class="tbl-btn tbl-btn-danger" onclick="clickSound();deleteIssued('${escAttr(String(r.id))}')"><i class="fas fa-times"></i></button></td>
-    </tr>
-  `).join('');
-}
+        .loader-text {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 0.5s;
+        }
 
-async function deleteIssued(id) {
-  try {
-    const { db, ref, remove } = window._fb;
-    await remove(ref(db, `issued/${id}`));
-    showToast('Record removed');
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
-function printIssued() { window.print(); }
+        .loader-progress-container {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
 
-/* =====================================================
-   MODALS / TOAST / UTILS
-   ===================================================== */
-function openModal(id)  { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        .loader-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary-orange), var(--light-blue));
+            border-radius: 10px;
+            animation: loading 2.5s ease forwards;
+        }
 
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target===m) closeModal(m.id); });
-});
+        .loader-percentage {
+            color: #ffffff;
+            font-size: 14px;
+            margin-top: 20px;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 1s;
+        }
 
-function showToast(msg, type='success') {
-  const c = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => { t.style.transition='opacity 0.4s'; t.style.opacity='0'; setTimeout(() => t.remove(), 400); }, 3000);
-}
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
 
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escAttr(str) { return String(str||'').replace(/'/g,"\\'"); }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
 
-function csvToRows(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
-  return lines.slice(1).map(l => {
-    const vals = l.split(',').map(v => v.trim().replace(/^"|"$/g,''));
-    const obj = {};
-    headers.forEach((h,i) => obj[h] = vals[i]||'');
-    return obj;
-  });
-}
+        @keyframes loading {
+            0% {
+                width: 0%;
+            }
+            20% {
+                width: 20%;
+            }
+            50% {
+                width: 60%;
+            }
+            80% {
+                width: 85%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
 
-/* =====================================================
-   INIT
-   ===================================================== */
-window.addEventListener('fbReady', async () => {
-  fbReady = true;
-  await initFirebaseData();
+        /* Prevent scrolling while loading */
+        body.loading {
+            overflow: hidden;
+        }
 
-  // Hide loading screen
-  setTimeout(() => {
-    const ls = document.getElementById('loading-screen');
-    ls.classList.add('fade-out');
-    setTimeout(() => { ls.style.display='none'; showPage('landing'); animateLanding(); }, 800);
-  }, 600);
-});
+        /* Navigation */
+        nav {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
 
-// Fallback if Firebase takes too long
-setTimeout(() => {
-  if (!fbReady) {
-    setFbStatus('error', 'Offline mode');
-    _books = SEED_BOOKS; _students = []; _issued = [];
-    const ls = document.getElementById('loading-screen');
-    ls.classList.add('fade-out');
-    setTimeout(() => { ls.style.display='none'; showPage('landing'); animateLanding(); }, 800);
-  }
-}, 8000);
-</script>
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: var(--primary-orange);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--gray-800);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-orange);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-orange);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-blue);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 70px;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.8), rgba(15, 23, 42, 0.9)), 
+                        url('https://images.unsplash.com/photo-1632759145351-1d592919f522?w=1920') center/cover;
+            height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 2rem;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--primary-orange);
+            color: var(--white);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 5rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary-orange);
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 1.5rem auto 0;
+        }
+
+        /* Services Section */
+        .services {
+            background: var(--gray-100);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .service-image {
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .service-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(30, 58, 138, 0.7) 100%);
+        }
+
+        .service-content {
+            padding: 1.5rem;
+        }
+
+        .service-content h3 {
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .service-content p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        /* Projects Gallery */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            height: 300px;
+            cursor: pointer;
+        }
+
+        .project-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .project-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 58, 138, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .project-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .project-item:hover .project-overlay {
+            opacity: 1;
+        }
+
+        .project-overlay h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .project-overlay p {
+            transform: translateY(20px);
+            transition: transform 0.3s ease 0.1s;
+        }
+
+        .project-item:hover .project-overlay h3,
+        .project-item:hover .project-overlay p {
+            transform: translateY(0);
+        }
+
+        /* Pricing Section */
+        .pricing {
+            background: var(--gray-100);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card.featured {
+            transform: scale(1.05);
+            border: 3px solid var(--primary-orange);
+        }
+
+        .pricing-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: 20px;
+            right: -35px;
+            background: var(--primary-orange);
+            color: var(--white);
+            padding: 0.5rem 3rem;
+            transform: rotate(45deg);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .pricing-header {
+            margin-bottom: 2rem;
+        }
+
+        .pricing-header h3 {
+            color: var(--dark-blue);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            color: var(--primary-orange);
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--gray-600);
+            font-weight: 400;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pricing-features li i {
+            color: var(--primary-orange);
+        }
+
+        .book-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 1rem;
+            background: var(--dark-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .book-btn:hover {
+            background: var(--primary-orange);
+        }
+
+        .pricing-card.featured .book-btn {
+            background: var(--primary-orange);
+        }
+
+        .pricing-card.featured .book-btn:hover {
+            background: var(--dark-blue);
+        }
+
+        /* Why Choose Us */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 15px;
+            background: var(--white);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-orange), var(--dark-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--white);
+            font-size: 2rem;
+        }
+
+        .feature-item h3 {
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-item p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background: var(--gray-100);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            font-size: 4rem;
+            color: var(--primary-orange);
+            opacity: 0.3;
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-family: serif;
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-orange);
+        }
+
+        .testimonial-info h4 {
+            color: var(--dark-blue);
+            margin-bottom: 0.2rem;
+        }
+
+        .testimonial-info .stars {
+            color: #fbbf24;
+        }
+
+        .testimonial-text {
+            color: var(--gray-600);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        /* Contact Section */
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .contact-info {
+            background: linear-gradient(135deg, var(--dark-blue), var(--darker-blue));
+            color: var(--white);
+            padding: 3rem;
+            border-radius: 20px;
+        }
+
+        .contact-info h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-details {
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-item i {
+            font-size: 1.5rem;
+            color: var(--primary-orange);
+            margin-top: 0.2rem;
+        }
+
+        .contact-item div h4 {
+            margin-bottom: 0.3rem;
+            font-size: 1.1rem;
+        }
+
+        .contact-item div p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .social-links a {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary-orange);
+            transform: translateY(-3px);
+        }
+
+        .contact-form {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark-blue);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-orange);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--darker-blue);
+            color: var(--white);
+            padding: 3rem 2rem 1rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--primary-orange);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            line-height: 2;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-orange);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background: var(--white);
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: 0 10px 27px rgba(0,0,0,0.05);
+                padding: 2rem 0;
+                gap: 1.5rem;
+            }
+
+            .nav-links.active {
+                left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .pricing-card.featured:hover {
+                transform: translateY(-10px);
+            }
+
+            .contact-wrapper {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .contact-info {
+                padding: 2rem;
+            }
+
+            .loader-logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .loader-logo i {
+                font-size: 60px;
+            }
+
+            .loader-text {
+                font-size: 18px;
+            }
+
+            .loader-progress-container {
+                width: 150px;
+            }
+
+            .sound-toggle {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                height: 80vh;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .services-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .loader-logo {
+                width: 70px;
+                height: 70px;
+            }
+
+            .loader-logo i {
+                font-size: 50px;
+            }
+
+            .loader-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body class="loading">
+
+    <!-- Sound Toggle Button -->
+    <button class="sound-toggle" id="soundToggle" title="Toggle Sound">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader">
+        <div class="loader-logo">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="loader-text">SkyRoof Construction</div>
+        <div class="loader-progress-container">
+            <div class="loader-progress-bar"></div>
+        </div>
+        <div class="loader-percentage" id="loaderPercentage">0%</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-home"></i>
+                SkyRoof Construction
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Professional Roofing & Construction Services</h1>
+            <p>Strong, Durable, and Affordable Roof Solutions for Your Home and Business</p>
+            <a href="#contact" class="cta-button">Get Free Quote</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Our Services</h2>
+                <p>We offer comprehensive roofing solutions tailored to meet your specific needs with quality workmanship and premium materials.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card fade-in">
+                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1632759145351-1d592919f522?w=600')"></div>
+                    <div class="service-content">
+                        <h3>Roof Installation</h3>
+                        <p>Complete new roof installation using premium materials and expert craftsmanship for long-lasting protection.</p>
+                    </div>
+                </div>
+                <div class="service-card fade-in">
+                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600')"></div>
+                    <div class="service-content">
+                        <h3>Roof Repair</h3>
+                        <p>Expert repair services for leaks, damages, and wear to extend the life of your existing roof.</p>
+                    </div>
+                </div>
+                <div class="service-card fade-in">
+                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600')"></div>
+                    <div class="service-content">
+                        <h3>Metal Roofing</h3>
+                        <p>Durable and energy-efficient metal roofing solutions that last for decades with minimal maintenance.</p>
+                    </div>
+                </div>
+                <div class="service-card fade-in">
+                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600')"></div>
+                    <div class="service-content">
+                        <h3>Tile Roofing</h3>
+                        <p>Beautiful and durable tile roofing options that add aesthetic value and superior protection.</p>
+                    </div>
+                </div>
+                <div class="service-card fade-in">
+                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600')"></div>
+                    <div class="service-content">
+                        <h3>Waterproofing</h3>
+                        <p>Advanced waterproofing solutions to protect your property from water damage and moisture.</p>
+                    </div>
+                </div>
+                <div class="service-card fade-in">
+                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600')"></div>
+                    <div class="service-content">
+                        <h3>Roof Inspection</h3>
+                        <p>Thorough inspection services to identify potential issues before they become major problems.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Gallery -->
+    <section class="projects" id="projects">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Our Projects</h2>
+                <p>Browse through our portfolio of successful roofing projects completed with excellence.</p>
+            </div>
+            <div class="projects-grid">
+                <div class="project-item fade-in">
+                    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600" alt="Residential Roof Project">
+                    <div class="project-overlay">
+                        <h3>Residential Complex</h3>
+                        <p>Complete roof installation with premium tiles</p>
+                    </div>
+                </div>
+                <div class="project-item fade-in">
+                    <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=600" alt="Commercial Building">
+                    <div class="project-overlay">
+                        <h3>Commercial Building</h3>
+                        <p>Metal roofing system installation</p>
+                    </div>
+                </div>
+                <div class="project-item fade-in">
+                    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600" alt="Villa Project">
+                    <div class="project-overlay">
+                        <h3>Luxury Villa</h3>
+                        <p>Custom roofing design and installation</p>
+                    </div>
+                </div>
+                <div class="project-item fade-in">
+                    <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600" alt="Industrial Roof">
+                    <div class="project-overlay">
+                        <h3>Industrial Warehouse</h3>
+                        <p>Large-scale metal roofing project</p>
+                    </div>
+                </div>
+                <div class="project-item fade-in">
+                    <img src="https://images.unsplash.com/photo-1600573472591-ee6c563aaec9?w=600" alt="Apartment Complex">
+                    <div class="project-overlay">
+                        <h3>Apartment Complex</h3>
+                        <p>Waterproofing and roof repair</p>
+                    </div>
+                </div>
+                <div class="project-item fade-in">
+                    <img src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=600" alt="Heritage Building">
+                    <div class="project-overlay">
+                        <h3>Heritage Building</h3>
+                        <p>Restoration and tile roofing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Our Pricing</h2>
+                <p>Transparent pricing with no hidden costs. Choose the package that fits your needs.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card fade-in">
+                    <div class="pricing-header">
+                        <h3>Basic Package</h3>
+                        <div class="price">₹15,000<span>/project</span></div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Roof Inspection</li>
+                        <li><i class="fas fa-check"></i> Minor Repairs</li>
+                        <li><i class="fas fa-check"></i> Basic Materials</li>
+                        <li><i class="fas fa-check"></i> 1 Year Warranty</li>
+                        <li><i class="fas fa-check"></i> Free Consultation</li>
+                    </ul>
+                    <button class="book-btn" onclick="selectPackage('Basic')">Book Now</button>
+                </div>
+                <div class="pricing-card featured fade-in">
+                    <div class="pricing-header">
+                        <h3>Standard Package</h3>
+                        <div class="price">₹50,000<span>/project</span></div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Roof Repair</li>
+                        <li><i class="fas fa-check"></i> Waterproof Coating</li>
+                        <li><i class="fas fa-check"></i> Quality Materials</li>
+                        <li><i class="fas fa-check"></i> 3 Years Warranty</li>
+                        <li><i class="fas fa-check"></i> Free Inspection</li>
+                    </ul>
+                    <button class="book-btn" onclick="selectPackage('Standard')">Book Now</button>
+                </div>
+                <div class="pricing-card fade-in">
+                    <div class="pricing-header">
+                        <h3>Premium Package</h3>
+                        <div class="price">₹2,50,000<span>/project</span></div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Complete New Roof Installation</li>
+                        <li><i class="fas fa-check"></i> Premium Materials</li>
+                        <li><i class="fas fa-check"></i> Advanced Waterproofing</li>
+                        <li><i class="fas fa-check"></i> 10 Years Warranty</li>
+                        <li><i class="fas fa-check"></i> Free Maintenance (1 Year)</li>
+                    </ul>
+                    <button class="book-btn" onclick="selectPackage('Premium')">Book Now</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="why-choose-us" id="about">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Why Choose Us</h2>
+                <p>We are committed to delivering excellence in every project we undertake.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3>10+ Years Experience</h3>
+                    <p>Over a decade of expertise in roofing and construction services.</p>
+                </div>
+                <div class="feature-item fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Certified Contractors</h3>
+                    <p>Our team consists of licensed and certified professionals.</p>
+                </div>
+                <div class="feature-item fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <h3>Quality Materials</h3>
+                    <p>We use only premium, tested materials for all projects.</p>
+                </div>
+                <div class="feature-item fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h3>Affordable Pricing</h3>
+                    <p>Competitive rates without compromising on quality.</p>
+                </div>
+                <div class="feature-item fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Fast Project Delivery</h3>
+                    <p>Timely completion without compromising workmanship.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>What Our Clients Say</h2>
+                <p>Don't just take our word for it - hear from our satisfied customers.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-header">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" alt="Client" class="testimonial-img">
+                        <div class="testimonial-info">
+                            <h4>Rajesh Kumar</h4>
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"Excellent service! The team at SkyRoof completed our roof installation ahead of schedule. The quality of work is outstanding and the pricing was very reasonable."</p>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-header">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200" alt="Client" class="testimonial-img">
+                        <div class="testimonial-info">
+                            <h4>Priya Sharma</h4>
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"We had a major leak issue and SkyRoof fixed it within a day. Their waterproofing solution has been perfect - no leaks even during heavy monsoon. Highly recommended!"</p>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-header">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200" alt="Client" class="testimonial-img">
+                        <div class="testimonial-info">
+                            <h4>Amit Patel</h4>
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"Professional team with great attention to detail. They installed metal roofing for our warehouse and the results exceeded our expectations. Great value for money!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Get In Touch</h2>
+                <p>Ready to start your project? Contact us for a free consultation and quote.</p>
+            </div>
+            <div class="contact-wrapper">
+                <div class="contact-info fade-in">
+                    <h3>Contact Information</h3>
+                    <p>Get in touch with us for any inquiries or to schedule a free consultation.</p>
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <i class="fas fa-phone-alt"></i>
+                            <div>
+                                <h4>Phone</h4>
+                                <p>+91 98765 43210</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>info@skyroofconstruction.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Address</h4>
+                                <p>Rohtak, Haryana, India</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="contact-form fade-in">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" required placeholder="Tell us about your project requirements..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>SkyRoof Construction</h3>
+                <p>Your trusted partner for all roofing and construction needs. Quality workmanship guaranteed.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Services</h3>
+                <ul>
+                    <li><a href="#">Roof Installation</a></li>
+                    <li><a href="#">Roof Repair</a></li>
+                    <li><a href="#">Metal Roofing</a></li>
+                    <li><a href="#">Waterproofing</a></li>
+                    <li><a href="#">Roof Inspection</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Business Hours</h3>
+                <p>Monday - Saturday: 9:00 AM - 6:00 PM</p>
+                <p>Sunday: Closed</p>
+                <p>Emergency Services Available 24/7</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkyRoof Construction. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ========== SOUND EFFECTS SYSTEM ==========
+        let audioContext = null;
+        let isMuted = false;
+
+        // Initialize Audio Context on first user interaction
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        // Play a tone with given frequency, duration, and type
+        function playTone(frequency, duration, type = 'sine', volume = 0.1, delay = 0) {
+            if (isMuted || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + delay);
+            
+            // Smooth fade in/out to avoid clicks
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime + delay);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + delay + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + delay + duration);
+            
+            oscillator.start(audioContext.currentTime + delay);
+            oscillator.stop(audioContext.currentTime + delay + duration);
+        }
+
+        // Apple-style startup chime (multiple harmonious notes)
+        function playStartupChime() {
+            if (isMuted || !audioContext) return;
+            
+            // F major chord: F, A, C, F (octave)
+            const notes = [
+                { freq: 349.23, delay: 0 },      // F4
+                { freq: 440.00, delay: 0.1 },    // A4
+                { freq: 523.25, delay: 0.2 },    // C5
+                { freq: 698.46, delay: 0.3 },    // F5
+                { freq: 880.00, delay: 0.4 }     // A5
+            ];
+            
+            notes.forEach(note => {
+                playTone(note.freq, 1.5, 'sine', 0.08, note.delay);
+            });
+        }
+
+        // Soft click sound for buttons
+        function playClickSound() {
+            if (isMuted || !audioContext) return;
+            
+            playTone(800, 0.08, 'sine', 0.05, 0);
+            playTone(1200, 0.06, 'sine', 0.03, 0.02);
+        }
+
+        // Subtle hover sound
+        function playHoverSound() {
+            if (isMuted || !audioContext) return;
+            
+            playTone(1500, 0.05, 'sine', 0.02, 0);
+        }
+
+        // Success sound for form submission
+        function playSuccessSound() {
+            if (isMuted || !audioContext) return;
+            
+            // Ascending happy notes
+            playTone(523.25, 0.15, 'sine', 0.08, 0);    // C5
+            playTone(659.25, 0.15, 'sine', 0.08, 0.1);  // E5
+            playTone(783.99, 0.25, 'sine', 0.08, 0.2);  // G5
+        }
+
+        // Navigation click sound
+        function playNavSound() {
+            if (isMuted || !audioContext) return;
+            
+            playTone(600, 0.06, 'triangle', 0.04, 0);
+            playTone(900, 0.05, 'triangle', 0.03, 0.03);
+        }
+
+        // ========== LOADING SCREEN LOGIC ==========
+        window.addEventListener('load', function() {
+            // Initialize audio on load (needs user interaction to actually play)
+            initAudio();
+            
+            const loader = document.getElementById('loader');
+            const percentageEl = document.getElementById('loaderPercentage');
+            let percentage = 0;
+            
+            // Animate percentage counter
+            const counterInterval = setInterval(() => {
+                percentage++;
+                percentageEl.textContent = percentage + '%';
+                
+                if (percentage >= 100) {
+                    clearInterval(counterInterval);
+                    
+                    // Hide loader after animation completes
+                    setTimeout(() => {
+                        loader.classList.add('hidden');
+                        document.body.classList.remove('loading');
+                        // Play startup chime when loading completes
+                        playStartupChime();
+                    }, 500);
+                }
+            }, 25);
+        });
+
+        // Initialize audio on first user interaction (browser policy requirement)
+        document.addEventListener('click', initAudio, { once: true });
+        document.addEventListener('touchstart', initAudio, { once: true });
+        document.addEventListener('keydown', initAudio, { once: true });
+
+        // ========== SOUND TOGGLE ==========
+        const soundToggle = document.getElementById('soundToggle');
+        soundToggle.addEventListener('click', function() {
+            initAudio();
+            isMuted = !isMuted;
+            const icon = this.querySelector('i');
+            
+            if (isMuted) {
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute');
+                this.classList.add('muted');
+            } else {
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+                this.classList.remove('muted');
+                playClickSound();
+            }
+        });
+
+        // ========== MOBILE MENU TOGGLE ==========
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            initAudio();
+            playClickSound();
+            navLinks.classList.toggle('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                initAudio();
+                playNavSound();
+                navLinks.classList.remove('active');
+                mobileMenuBtn.querySelector('i').classList.remove('fa-times');
+                mobileMenuBtn.querySelector('i').classList.add('fa-bars');
+            });
+
+            link.addEventListener('mouseenter', () => {
+                initAudio();
+                playHoverSound();
+            });
+        });
+
+        // ========== NAVBAR SCROLL EFFECT ==========
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 2px 20px rgba(0,0,0,0.1)';
+            } else {
+                navbar.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            }
+        });
+
+        // ========== SCROLL ANIMATION OBSERVER ==========
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ========== PACKAGE SELECTION ==========
+        function selectPackage(packageName) {
+            initAudio();
+            playClickSound();
+            
+            const message = document.getElementById('message');
+            const contactSection = document.getElementById('contact');
+            
+            message.value = `I am interested in the ${packageName} Package. Please provide more details.`;
+            contactSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Show alert for demo purposes
+            setTimeout(() => {
+                alert(`Thank you for your interest in the ${packageName} Package! Please fill out the contact form and we'll get back to you shortly.`);
+            }, 500);
+        }
+
+        // ========== FORM SUBMISSION ==========
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            initAudio();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+            
+            // Simulate form submission
+            const submitBtn = this.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                playSuccessSound();
+                alert('Thank you for your message! We will contact you soon.');
+                this.reset();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 1500);
+        });
+
+        // ========== SMOOTH SCROLL FOR ALL ANCHOR LINKS ==========
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                initAudio();
+                playNavSound();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // ========== ADD SOUND EFFECTS TO BUTTONS ==========
+        document.querySelectorAll('.book-btn, .cta-button, .submit-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                initAudio();
+                playHoverSound();
+            });
+            btn.addEventListener('click', () => {
+                initAudio();
+                playClickSound();
+            });
+        });
+
+        // ========== ADD SOUND EFFECTS TO SERVICE CARDS ==========
+        document.querySelectorAll('.service-card, .project-item, .feature-item').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                initAudio();
+                playHoverSound();
+            });
+        });
+
+        // ========== ADD SOUND EFFECTS TO SOCIAL LINKS ==========
+        document.querySelectorAll('.social-links a').forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                initAudio();
+                playHoverSound();
+            });
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                initAudio();
+                playClickSound();
+            });
+        });
+
+        // ========== ACTIVE NAV LINK HIGHLIGHTING ==========
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const sections = document.querySelectorAll('section');
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 100)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.style.color = '';
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.style.color = 'var(--primary-orange)';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
